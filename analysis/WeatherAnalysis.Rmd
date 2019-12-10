@@ -58,7 +58,8 @@ jse = jse %>% select('Date', "Price", "Vol.")
 head(jse)
 
 # standardized price
-z_price = (jse$Price - mean(jse$Price))/sd(jse$Price)
+jse$z_price = (jse$Price - mean(jse$Price))/sd(jse$Price)
+
 
 # plot 
 jse_plot <- ggplot(jse, aes(x=Date, y=Price)) + geom_line(col='darkblue') + ggtitle("JSE All Shares Index")
@@ -73,6 +74,8 @@ jse_plot_z
 
 ### Clean Weather Data 
 ```{r}
+library(dplyr)
+
 # date
 jhb$date_time = as.Date(jhb$date_time)
 ct$date_time = as.Date(ct$date_time)
@@ -81,19 +84,44 @@ pta$date_time = as.Date(pta$date_time)
 blm$date_time = as.Date(blm$date_time)
 
 
-library(dplyr)
-
-# average temperature per day
-jhb_mean_temp <- jhb %>% group_by(date_time) %>% summarise(mean_temp = mean(tempC))
-
-ggplot(jhb_mean_temp)
-
-# merge datasets
-jhb_mean_temp$Date = jhb_mean_temp$date_time
-t = merge(jhb_mean_temp, jse, by='Date')
 
 
-t %>% select('Date', 'mean_temp', 'Price','Vol.')
+# compute + add standardized variable
+standard_mean_temp <- function(dataset, vars) {
+  
+  # average temperature per day
+  mean_temp <- dataset %>% group_by(date_time) %>% summarise(mean_temp = mean(tempC))
+  
+  for (i in (1:length(vars))) {
+    paste(i, "_z", sep="")
+  }
+  
+  
+  # average temperature per day
+  mean_temp <- dataset %>% group_by(date_time) %>% summarise(mean_temp = mean(tempC))
+  
+  # merge datasets
+  dataset$Date = dataset$date_time
+  t = merge(jhb_mean_temp, jse, by='Date')
+  t$temp_z = (t$mean_temp - mean(t$mean_temp))/sd(t$mean_temp)
+  
+  
+  # select desired columns
+  t = t %>% select('Date', 'temp_z', 'z_price','Vol.') 
+  
+  
+  print(paste("Correlation", cor(t$z_price, t$temp_z))) 
+}
+
+
+
+
+
+
+# visualize
+ggplot(t, aes(x=Date, y=z_price)) + geom_line(col='darkgreen') +
+  geom_line(aes(x=Date, y=temp_z), col='darkred') + ggtitle("Temp vs JSE")
+
 
 
 ```
@@ -102,23 +130,20 @@ t %>% select('Date', 'mean_temp', 'Price','Vol.')
 
 
 
-cor(jhb[,2:3])
-
-jhb[,-["date_time"]]
-
-
-names(jhb)
-
-
-
-library(corrplot)
-
-
-jhb.cor <- cor(jhb[, !names(jhb) %in% c("date_time", 'moonrise', 'moonset', 'sunrise', 'sunset')])
-
-corrplot(jhb.cor)
-
-
+  # average temperature per day
+  jhb_mean_temp <- jhb %>% group_by(date_time) %>% summarise(mean_temp = mean(tempC))
+  
+  # merge datasets
+  jhb_mean_temp$Date = jhb_mean_temp$date_time
+  t = merge(jhb_mean_temp, jse, by='Date')
+  t$temp_z = (t$mean_temp - mean(t$mean_temp))/sd(t$mean_temp)
+  
+  
+  # select desired columns
+  t = t %>% select('Date', 'temp_z', 'z_price','Vol.') 
+  
+  
+  print(paste("Correlation", cor(t$z_price, t$temp_z))) 
 
 
 
