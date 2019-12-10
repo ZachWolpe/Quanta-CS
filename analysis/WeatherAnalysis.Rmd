@@ -77,42 +77,56 @@ jse_plot_z
 library(dplyr)
 
 # date
-jhb$date_time = as.Date(jhb$date_time)
-ct$date_time = as.Date(ct$date_time)
-dur$date_time = as.Date(dur$date_time)
-pta$date_time = as.Date(pta$date_time)
-blm$date_time = as.Date(blm$date_time)
+jhb$Date = as.Date(jhb$date_time)
+ct$Date = as.Date(ct$date_time)
+dur$Date = as.Date(dur$date_time)
+pta$Date = as.Date(pta$date_time)
+blm$Date = as.Date(blm$date_time)
 
 
 
 
-# compute + add standardized variable
-standard_mean_temp <- function(dataset, vars) {
+install.packages("docstring")
+library(docstring)
+
+
+dataset = jhb
+    # average per day & stdard value
+    daily_mean <- dataset %>% group_by(Date) %>% summarise(mean = mean(dataset$tempC)) 
+    mean_z <- (daily_mean$mean - mean(daily_mean$mean))/sd(daily_mean$mean)
+    
+    daily_mean
+    mean_z
+    # add to dataset
+    dataset$paste(i, "_z", sep="") <- mean_z
+
+
+
+standard_mean_temp <- function(dataset, vars, list=FALSE) {
+  " Return standardized variable - attached to dataframe " 
+    print(dataset)
   
-  # average temperature per day
-  mean_temp <- dataset %>% group_by(date_time) %>% summarise(mean_temp = mean(tempC))
-  
-  for (i in (1:length(vars))) {
-    paste(i, "_z", sep="")
-  }
-  
-  
-  # average temperature per day
-  mean_temp <- dataset %>% group_by(date_time) %>% summarise(mean_temp = mean(tempC))
-  
-  # merge datasets
-  dataset$Date = dataset$date_time
-  t = merge(jhb_mean_temp, jse, by='Date')
-  t$temp_z = (t$mean_temp - mean(t$mean_temp))/sd(t$mean_temp)
-  
-  
+    # average per day & stdard value
+    daily_mean <- dataset %>% group_by(Date) %>% summarise(mean = mean(vars)) 
+    mean_z <- (daily_mean$mean - mean(daily_mean$mean))/sd(daily_mean$mean)
+    
+    print(daily_mean)
+    print(mean_z)
+    # add to dataset
+    dataset$paste(i, "_z", sep="") <- mean_z
+}
+
+
+standard_mean_temp(jhb, jhb$tempC)
+
+length(c(jhb$tempC))
+
+
   # select desired columns
   t = t %>% select('Date', 'temp_z', 'z_price','Vol.') 
   
   
   print(paste("Correlation", cor(t$z_price, t$temp_z))) 
-}
-
 
 
 
