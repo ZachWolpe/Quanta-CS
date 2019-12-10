@@ -1,0 +1,40 @@
+---
+title: "Weather Analysis"
+output: html_notebook
+---
+
+Understanding the correlation between weather on JSE.
+
+
+# Import the data 
+The historical weather data for varies parts of SA have been downloaded, accompanied with the movement of the JSE all shares index over the same period.
+```{r}
+# set working directory 
+setwd("~/Desktop/Quanta_CS/analysis")
+
+# import weather data
+jhb = read.csv("../data/weather/johannesburg.csv")
+ct = read.csv("../data/weather/capetown.csv")
+dur = read.csv("../data/weather/durban.csv")
+pta = read.csv("../data/weather/pretoria.csv")
+blm = read.csv("../data/weather/Bloemfontein.csv")
+
+# JSE data
+jse = read.csv('../data/jse/JALSH.csv')
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
