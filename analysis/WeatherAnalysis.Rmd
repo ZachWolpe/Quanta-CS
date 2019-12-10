@@ -23,11 +23,46 @@ blm = read.csv("../data/weather/Bloemfontein.csv")
 jse = read.csv('../data/jse/JALSH.csv')
 ```
 
+### Clean Stock Data
+```{r}
+library(tidyverse)
+library(dplyr)
+
+# clean data
+jse$Price = as.numeric(gsub(",", "",jse$Price))
+jse$Open = as.numeric(gsub(",", "",jse$Open))
+jse$Low = as.numeric(gsub(",", "",jse$Low))
+jse$High = as.numeric(gsub(",", "",jse$High))
+
+# Volume 
+jse$Vol. = gsub("M", "000000", jse$Vol.)
+jse$Vol. = gsub("B", "000000000", jse$Vol.)
+jse$Vol. = as.numeric(jse$Vol.)
+jse$Vol.[which(jse$Vol. < 10)] = jse$Vol.[jse$Vol. < 10]*10000
+jse$Vol.
+
+# Date
+jse$Date = as.Date(jse$Date, format="%b %d, %y")
+
+# Keep: date, price & vol
+jse = jse %>% select('Date', "Price", "Vol.")
+
+# View Cleanup
+head(jse)
+```
+
+
+### Clean Weather Data 
+```{r}
+library(ggplot2)
+
+ggplot(jse, aes(x=Date, y=Price)) + geom_line(col='darkblue') + ggtitle("JSE All Shares Index")
+
+```
 
 
 
-
-
+````
 
 
 
