@@ -27,6 +27,7 @@ jse = read.csv('../data/jse/JALSH.csv')
 ```{r}
 library(tidyverse)
 library(dplyr)
+library(ggplot2)
 
 # clean data
 jse$Price = as.numeric(gsub(",", "",jse$Price))
@@ -39,30 +40,85 @@ jse$Vol. = gsub("M", "000000", jse$Vol.)
 jse$Vol. = gsub("B", "000000000", jse$Vol.)
 jse$Vol. = as.numeric(jse$Vol.)
 jse$Vol.[which(jse$Vol. < 10)] = jse$Vol.[jse$Vol. < 10]*10000
-jse$Vol.
 
 # Date
-jse$Date = as.Date(jse$Date, format="%b %d, %y")
+jse$Date = as.Date(jse$Date, format="%b %d, %Y")
 
 # Keep: date, price & vol
 jse = jse %>% select('Date', "Price", "Vol.")
 
+
+```
+
+
+# Examine Results
+```{r}
+
 # View Cleanup
 head(jse)
+
+# standardized price
+z_price = (jse$Price - mean(jse$Price))/sd(jse$Price)
+
+# plot 
+jse_plot <- ggplot(jse, aes(x=Date, y=Price)) + geom_line(col='darkblue') + ggtitle("JSE All Shares Index")
+jse_plot_z <- ggplot(jse, aes(x=Date, y=z_price)) + geom_line(col='maroon') + ggtitle("JSE All Shares Index Standardized")
+
+jse_plot
+jse_plot_z
+
+
 ```
 
 
 ### Clean Weather Data 
 ```{r}
-library(ggplot2)
+# date
+jhb$date_time = as.Date(jhb$date_time)
+ct$date_time = as.Date(ct$date_time)
+dur$date_time = as.Date(dur$date_time)
+pta$date_time = as.Date(pta$date_time)
+blm$date_time = as.Date(blm$date_time)
 
-ggplot(jse, aes(x=Date, y=Price)) + geom_line(col='darkblue') + ggtitle("JSE All Shares Index")
+
+library(dplyr)
+
+# average temperature per day
+jhb_mean_temp <- jhb %>% group_by(date_time) %>% summarise(mean_temp = mean(tempC))
+
+ggplot(jhb_mean_temp)
+
+# merge datasets
+jhb_mean_temp$Date = jhb_mean_temp$date_time
+t = merge(jhb_mean_temp, jse, by='Date')
+
+
+t %>% select('Date', 'mean_temp', 'Price','Vol.')
+
 
 ```
 
 
 
-````
+
+
+cor(jhb[,2:3])
+
+jhb[,-["date_time"]]
+
+
+names(jhb)
+
+
+
+library(corrplot)
+
+
+jhb.cor <- cor(jhb[, !names(jhb) %in% c("date_time", 'moonrise', 'moonset', 'sunrise', 'sunset')])
+
+corrplot(jhb.cor)
+
+
 
 
 
