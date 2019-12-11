@@ -1,0 +1,16 @@
+---
+title: "Twitter Scrapping"
+output: html_notebook
+---
+
+# Retrieving Twitter Data
+
+```{r}
+install.packages("twitteR")
+library("twitteR")
+
+??twitteR
+
+
+```
+

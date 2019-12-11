@@ -21,9 +21,13 @@ blm = read.csv("../data/weather/Bloemfontein.csv")
 
 # JSE data
 jse = read.csv('../data/jse/JALSH.csv')
+
+
 ```
 
 ### Clean Stock Data
+
++ Impute weekends
 ```{r}
 library(tidyverse)
 library(dplyr)
@@ -46,7 +50,6 @@ jse$Date = as.Date(jse$Date, format="%b %d, %Y")
 
 # Keep: date, price & vol
 jse = jse %>% select('Date', "Price", "Vol.")
-
 
 ```
 
@@ -125,6 +128,8 @@ dataset.corr = cor(dataset[,2:ncol(dataset)])
 library(corrplot)
 corrplot(dataset.corr)
 
+
+
 ```
 
 
@@ -142,9 +147,19 @@ library(reticulate)
 
 ```{r}
 jhb
-
-cloudcove
 ```
+
+
+
+
+
+
+
+
+
+
+
+
 # select desired columns
   t = t %>% select('Date', 'temp_z', 'z_price','Vol.') 
   
