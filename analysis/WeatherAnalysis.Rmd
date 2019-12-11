@@ -128,30 +128,23 @@ corrplot(dataset.corr)
 ```
 
 
+##### python setup
 
-
-
-
-
-```{}
-
+```{r}
+install.packages("reticulate")
+library(reticulate)
 ```
 
 
 
 
+# Sunlight vs Equities
 
+```{r}
+jhb
 
-
-
-
-
-
-
-
-
-
-
+cloudcove
+```
 # select desired columns
   t = t %>% select('Date', 'temp_z', 'z_price','Vol.') 
   
