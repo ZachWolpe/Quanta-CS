@@ -8,5 +8,62 @@ output: html_notebook
 
 ```{r}
 # Import Data
+getwd()
+library(rjson)
+
+tweets.jse = fromJSON('../../data/twitter - finance/JSE.json')
+tweets.adrian = fromJSON('../../data/twitter - finance/AdrianSaville.json')
+tweets.finCrisis = fromJSON('../../data/twitter - finance/FinCrisis.json')
+tweets.finPros = fromJSON('../../data/twitter - finance/FinProsperity.json')
+tweets.Karin = fromJSON('../../data/twitter - finance/KarinRichards.json')
+tweets.LStweets = fromJSON('../../data/twitter - finance/LStweets.json')
+tweets.malema = fromJSON('../../data/twitter - finance/Malema.json')
+tweets.NerinaVisser = fromJSON('../../data/twitter - finance/NerinaVisser.json')
+tweets.PaulTheron = fromJSON('../../data/twitter - finance/PaulTheron.json')
+tweets.Presidency = fromJSON('../../data/twitter - finance/Presidency.json')
+tweets.recessionJHB = fromJSON('../../data/twitter - finance/recessionJHB_tweets.json')
+tweets.TradersCorner = fromJSON('../../data/twitter - finance/TradersCorner.json')
+tweets.warreningram = fromJSON('../../data/twitter - finance/warreningram.json')
+tweets.WealthDist = fromJSON('../../data/twitter - finance/WealthDist.json')
 ```
+
+
+# Clean Data
+```{r}
+library(dplyr)
+
+
+
+
+
+
+clean_data <- function(dataset) {
+  "Process each Twitter file"
+  
+  # strip away redundant variables
+  select(tweets.jse, c('is_replied','is_reply_to','likes',"parent_tweet_id", 
+                       "replies", "retweets","text", 'timestamp'))
+  
+}
+
+
+tweets.jse = select(tweets.jse, c('is_replied','is_reply_to','likes',"parent_tweet_id", 
+                       "replies", "retweets","text", 'timestamp'))
+
+
+names(tweets.jse)
+
+head(tweets.jse)
+
+
+```
+
+
+
+
+
+
+
+
+
 
