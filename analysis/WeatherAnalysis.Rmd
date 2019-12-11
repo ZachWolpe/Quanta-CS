@@ -72,7 +72,7 @@ jse_plot_z
 ```
 
 
-### Clean Weather Data 
+### View Temperature Data 
 ```{r}
 library(dplyr)
 library(docstring)
@@ -103,6 +103,7 @@ blm$temp_z = standard_mean_temp(blm)
 pta$temp_z = standard_mean_temp(pta)
 
 
+
 # create 1 dateset with temperatures
 dataset = cbind(jhb$Date, jhb$temp_z,ct$temp_z, dur$temp_z, blm$temp_z, pta$temp_z)
 colnames(dataset) = c("Date", 'jhb', 'ct', 'dur', 'blm', 'pta')
@@ -110,10 +111,48 @@ dataset = data.frame(dataset)
 
 library(ggplot2)
 ggplot(dataset, aes(x=Date, y=jhb)) + geom_line(col='red',alpha=0.3) +
-  geom_line(aes(x=Date, y=ct), col='blue', alpha=0.3)
+  geom_line(aes(x=Date, y=ct), col='blue', alpha=0.3) + 
+  geom_line(aes(x=Date, y=dur), col='darkgreen', alpha=0.3) + 
+  geom_line(aes(x=Date, y=blm), col='black', alpha=0.3) + 
+  geom_line(aes(x=Date, y=pta), col='lightblue', alpha=0.3) +
+  ggtitle("Regular Temperature")
 
 
-  # select desired columns
+# correlation in temperature
+dataset.corr = cor(dataset[,2:ncol(dataset)])
+
+# plot correlation
+library(corrplot)
+corrplot(dataset.corr)
+
+```
+
+
+
+
+
+
+
+```{}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# select desired columns
   t = t %>% select('Date', 'temp_z', 'z_price','Vol.') 
   
   
@@ -126,15 +165,6 @@ ggplot(dataset, aes(x=Date, y=jhb)) + geom_line(col='red',alpha=0.3) +
 # visualize
 ggplot(t, aes(x=Date, y=z_price)) + geom_line(col='darkgreen') +
   geom_line(aes(x=Date, y=temp_z), col='darkred') + ggtitle("Temp vs JSE")
-
-
-
-```
-
-
-
-
-
 
 
 
