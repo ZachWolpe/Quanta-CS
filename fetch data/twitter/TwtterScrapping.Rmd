@@ -5,11 +5,22 @@ output: html_notebook
 
 # Retrieving Twitter Data
 
+## rTweet
 ```{r}
-install.packages("twitteR")
-library("twitteR")
+library(rtweet)
 
-??twitteR
+tweet = get_trends("south africa")
+tweet[1]
+
+?rtweet
+
+tweet = search_users("#math", n = 1)
+tweet['text']
+
+
+tweet = get_timelines(c("cnn", "BBCWorld", "foxnews"), n = 3200)
+
+class(tweet['created_at'][1])
 
 
 ```
