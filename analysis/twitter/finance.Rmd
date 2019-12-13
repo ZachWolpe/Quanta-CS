@@ -3,10 +3,11 @@ title: "Finance"
 output: html_notebook
 ---
 
-# Analysing Twitter Data
+# Twitter Analysis 
+## Finance
 
 ```{r}
-plot(cars)
+get 
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
