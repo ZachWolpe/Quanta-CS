@@ -234,6 +234,17 @@ prepare_for_NLP <- function(text_data) {
 res = prepare_for_NLP(data$text)
 
 
+# visualize most freq words
+vis = data.frame(word=names(res$frequency_of_words),
+                 freq=as.vector(res$frequency_of_words))
+
+ggplot(vis[1:10,], aes(x=reorder(word, -freq), y=freq, fill=word)) +
+  geom_bar(col="black", stat="identity") + xlab("common words") + ylab("n count") + 
+  ggtitle("Top 10 Words") + guides(fill=F) + theme(plot.title=element_text(hjust=0.5))
+
+
+
+
 
 # find associated words: great feature of search
 print('words associated with "good"')
@@ -253,23 +264,84 @@ library(fpc)
 
 
 
+
+```
+
+# Graph the Sentiment of each Tweet
+
+
+Assess the net sentiment of the words in the text by using the built in bing word sentiment dictionary - giving the sentiment of individual words.
+
+Compute the net-sentiment (positive - negative) for the tweets.
+
+### Sentiment of Most Common Words
+
+built in sentiment dictionary:
+
+ - get_sentiments("bing")
+ 
+ 
+Extremely limited as only words for words with a given sentiment.
+
+```{r}
+
+data$text
+# get sentiment of words
+sent <- inner_join(get_sentiments("bing"), vis, by="word")
+head(sent)
+
+
+# compute + or - for graph
+sent = sent %>% mutate(
+  pole = if_else(sentiment=="positive", 1,-1),
+  score = pole*freq
+  )
+head(sent)
+
+
+sent
+
+ggplot(sent, aes(x=reorder(word,-score), y=score, fill=pole)) + 
+  geom_bar(col="black", stat="identity") + ggtitle("Sentiment of Most Common Words") + 
+  xlab("common words") + ylab("n count") + guides(fill=F) + theme(plot.title=element_text(hjust=0.5))
+
+
+ 
+
 ```
 
 
-
-
-
-# Analysis using Tidy Text 
+# Analysis using Tidy Text: EDA & Visualization
 
 ```{r}
 library(tidytext)
 library(dplyr)
 library(stringr)
+library(igraph)
+library(ggraph)
+library(widyr)
+library(reshape2)
 
 
 
 
 ```
+
+
+
+# Climate Change Example
+
+```{r}
+library(rtweet)
+# gsub('http.*',"")
+# gsub('https.*',"")
+
+
+
+
+```
+
+
 
 
 
