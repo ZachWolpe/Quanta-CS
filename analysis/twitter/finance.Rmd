@@ -1,11 +1,11 @@
 ---
 title: "The Impact of Key Players in the Twittersphere on financial markets"
 output:
-  pdf_document: default
   html_notebook: default
-  word_document: default
   html_document:
     df_print: paged
+  word_document: default
+  pdf_document: default
 ---
 
 
@@ -212,8 +212,8 @@ prepare_for_NLP <- function(text_data) {
   frequency_of_words = frequency_of_words[order(frequency_of_words, decreasing=T)]
 
   # arrange from most
-  print("Most frequently occuring words:")
-  print(head(frequency_of_words, 7))
+  #print("Most frequently occuring words:")
+  #print(head(frequency_of_words, 7))
   
   # create wordcloud
   wordcloud(freq=as.vector(frequency_of_words), words=names(frequency_of_words),
@@ -253,8 +253,7 @@ findAssocs(res$myDtm, c('good'), 0.12)
 
 
 # Cluster the data
-install.packages('fpc')
-library(fpc)
+
 
 # k means clustering
 # d = dist(t(as.matrix(myDtm)), method='euclidean')
@@ -456,7 +455,7 @@ wordcloud(sent_neg$text, sent_neg$freq, random.order=FALSE,
 
 # Alternative using Tidyverse
 
-Scraping new data from Twitter 
+Scraping new data from Twitter. The accounts Musk followers, ranked by how many followers they have.
 
 ```{r}
 library(ggplot2)
@@ -469,7 +468,15 @@ library(tidytext)
 library(NLP)
 
 
+
+
+
 library(twitteR)
+library(ROAuth)
+library(httr)
+library(base64enc)
+
+
 
 # Access Token
 token <- list()
@@ -477,7 +484,6 @@ token['api_key'] <- "u7LYnq9olFJWNaHxA5OCMHwKE"
 token['api_key_secret'] <- "5bEuV3aGh57bBrLQKDxpdKe26DoSCx0EiNiiE78QQQ2mTKpMDx"
 token['access_token'] <- '2962567919-BRWjF8qZrNBxH1sAPsReT2epl19HWz8u3cx8Uq0'
 token['access_token_secret'] <- '0HHAd04bR7R3y6tjdj7cTmUCeBsEAOwCHSouZsbeli9ad'
-
 
 
 
@@ -496,7 +502,7 @@ friends_df = twListToDF(friends) %>% rownames_to_column()
 head(friends_df)
 
 
-# get top following accounts (activity?)
+# get top following accounts (based on activity?)
 top_fol <- friends_df %>%
   mutate(date=as.Date(created, format="%Y-%m-%d"),
          today=as.Date("2019-12-14", format="%Y-%m-%d"),
@@ -514,15 +520,94 @@ library(SnowballC)
 
 # top tweets from accounts user is following 
 top_fol_tweets <- top_fol %>%
-  left_join(select(friends_df, screenName, description), by='screenName')
+  left_join(select(friends_df, screenName, description), by='screenName') %>% 
+  mutate(id = seq_along(1:n()))
 
-tidy_decr <- top_fol %>%
+tidy_decr <- top_fol_tweets %>%
   unnest_tokens(word, description) %>%
   mutate(word_stem = wordStem(word)) %>%
-  anti_join(stopwords, by="word") %>%
+  anti_join(stop_words, by="word") %>%
   filter(!grepl("\\.|http", word))
 
-````
+head(tidy_decr)
+
+# Tidy wordcloud
+library(ggwordcloud)
+
+
+# Rank by no. followers
+tidy_decr = tidy_decr %>% group_by(screenName) %>% select(screenName, followersCount) %>% distinct()
+head(tidy_decr)
+
+
+
+
+ggplot(tidy_decr, aes(label=screenName, size=followersCount, color=followersCount)) +
+  geom_text_wordcloud() + theme_minimal() + 
+  scale_color_gradient(low="darkblue", high='lightblue') + 
+  ggtitle('Accounts Musk Follows - sized by their number of followers')
+  
+
+```
+
+
+
+# Word Frequency in Data 
+
+```{r}
+
+library(twitteR)
+library(ROAuth)
+library(httr)
+library(base64enc)
+
+
+
+# Access Token
+token <- list()
+token['api_key'] <- "u7LYnq9olFJWNaHxA5OCMHwKE"
+token['api_key_secret'] <- "5bEuV3aGh57bBrLQKDxpdKe26DoSCx0EiNiiE78QQQ2mTKpMDx"
+token['access_token'] <- '2962567919-BRWjF8qZrNBxH1sAPsReT2epl19HWz8u3cx8Uq0'
+token['access_token_secret'] <- '0HHAd04bR7R3y6tjdj7cTmUCeBsEAOwCHSouZsbeli9ad'
+
+
+# download file
+download.file(url='https://curl.haxx.se/ca/cacert.pem',
+              destfile='cacert.pem')
+
+
+# connect 
+setup_twitter_oauth(token$api_key, token$api_key_secret, token$access_token, token$access_token_secret)
+
+
+# get tweets 
+tweets_may <- searchTwitter('@theresa_may', n=1500)
+
+tweets_df <- do.call('rbind', lapply(tweets_may, as.data.frame))
+tweets_df <- sapply(tweets_df, function(x) iconv(x, 'latin1', 'ASCII', sub=""))
+tweets_df <- as.data.frame(tweets_df)
+head(tweets_df)
+
+library(NLP) 
+library(tm)
+library(SnowballC)
+library(qdap)
+
+may_corpus <- Corpus(VectorSource(tweets_df$text))
+freq <- freq_terms(may_corpus)
+
+may_corpus[1]
+??freq_terms
+plot(freq)
+
+```
+
+
+
+
+
+
+
 
 
 
