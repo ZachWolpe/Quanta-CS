@@ -329,12 +329,123 @@ library(reshape2)
 
 
 
-# Climate Change Example
+# TF-IDF Tutorial Example
 
 ```{r}
-library(rtweet)
+
 # gsub('http.*',"")
 # gsub('https.*',"")
+
+
+library(gutenbergr)
+library(tidytext)
+library(tidyverse)
+library(dplyr)
+
+
+# download data
+physics = gutenberg_download(c(37729, 14725, 13476, 5001), meta_fields='author')
+
+# word count per auther
+physics_words = physics %>% unnest_tokens(word, text) %>% 
+  count(author, word, sort=TRUE) %>% 
+  ungroup()
+head(physics_words)
+
+physics_words = physics_words %>% bind_tf_idf(word, author, n)
+head(physics_words)
+
+physics_words = physics_words %>% arrange(desc(tf_idf)) %>% 
+  mutate(word = factor(word, levels=rev(unique(word)))) %>%
+  mutate(author = factor(author, levels=c('Galilei, Galileo',
+                                          'Huygens, Christiaan',
+                                          'Tesla, Nikola',
+                                          'Einstein, Albert')))
+
+
+# visualize
+
+
+
+```
+
+
+
+# NLP: Sentiment Analysis
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tm)
+library(readr)
+library(wordcloud)
+library(plyr)
+library(lubridate)
+library(SnowballC)
+library(tidyr)
+library(tidytext)
+library(NLP)
+
+
+
+# unclean data 
+library(jsonlite)
+
+# get path to all files in folder
+file_names <- list.files(path = "../../data/twitter - finance/", pattern = "json", full.names=TRUE)
+
+# read in  + combine data
+data = data.frame()
+for (i in file_names) {
+  data = rbind(data, fromJSON(i))
+}
+
+# Clean Data
+text <- as.character(data$text)
+corpus <- Corpus(VectorSource(text))
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, content_transformer(tolower))
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, stripWhitespace)
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
+corpus <- tm_map(corpus, stemDocument)
+dtm <- DocumentTermMatrix(corpus)
+ 
+freq_up = colSums(as.matrix(dtm))
+freq_up = freq_up[order(freq_up, decreasing=TRUE)]
+print("Most Common Words")
+head(freq_up)
+
+
+# Sentiment
+library(RSentiment)
+
+sentiment_up <- calculate_sentiment(names(freq_up)[1:150])
+sentiment_up <- cbind(sentiment_up, as.data.frame(freq_up[1:150]))
+names(sentiment_up) = c("text","sentiment","freq")
+head(sentiment_up)
+
+# How positive vs Negative is the Data?
+#print(paste("Proportion of ",mean(sentiment_up$sentiment == "Positive"))
+pie(c(
+  mean(sentiment_up$sentiment == "Negative"),
+  mean(sentiment_up$sentiment == "Neutral"),
+  mean(sentiment_up$sentiment == "Positive")),
+  labels=c("Negative","Neutral","Positive"), main="Proportion of Positive vs Negative words")
+
+
+
+# split words
+sent_pos = sentiment_up[sentiment_up$sentiment=="Positive",]
+sent_neg = sentiment_up[sentiment_up$sentiment=="Negative",]
+
+cat("Negative sentiments: ", sum(sent_neg$freq), " Positive sentiment: ", sum(sent_pos$freq))
+
+# Create Postive & Negative Word Cloud
+wordcloud(sent_pos$text, sent_pos$freq, min.freq=1, random.order=FALSE,
+          colors=brewer.pal(9, "Greens")[4:9])
+wordcloud(sent_neg$text, sent_neg$freq, random.order=FALSE,
+          colors=brewer.pal(9, "Reds")[4:9])
 
 
 
@@ -343,8 +454,75 @@ library(rtweet)
 
 
 
+# Alternative using Tidyverse
+
+Scraping new data from Twitter 
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tm)
+library(wordcloud)
+library(SnowballC)
+library(tidyr)
+library(tidytext)
+library(NLP)
 
 
+library(twitteR)
+
+# Access Token
+token <- list()
+token['api_key'] <- "u7LYnq9olFJWNaHxA5OCMHwKE"
+token['api_key_secret'] <- "5bEuV3aGh57bBrLQKDxpdKe26DoSCx0EiNiiE78QQQ2mTKpMDx"
+token['access_token'] <- '2962567919-BRWjF8qZrNBxH1sAPsReT2epl19HWz8u3cx8Uq0'
+token['access_token_secret'] <- '0HHAd04bR7R3y6tjdj7cTmUCeBsEAOwCHSouZsbeli9ad'
+
+
+
+
+
+# connect 
+setup_twitter_oauth(token$api_key, token$api_key_secret, token$access_token, token$access_token_secret)
+
+# get tweets from a user
+user = getUser("elonmusk")
+
+# get accounts who user follows
+friends = user$getFriends()
+head(friends)
+
+friends_df = twListToDF(friends) %>% rownames_to_column()
+head(friends_df)
+
+
+# get top following accounts (activity?)
+top_fol <- friends_df %>%
+  mutate(date=as.Date(created, format="%Y-%m-%d"),
+         today=as.Date("2019-12-14", format="%Y-%m-%d"),
+         days=as.numeric(today-date),
+         statuscount_pday=statusesCount/days) %>%
+  select(screenName, followersCount, statuscount_pday) %>%
+  arrange(desc(followersCount)) %>%
+  .[1:100,]
+
+head(top_fol)
+
+
+# Clean Data
+library(SnowballC)
+
+# top tweets from accounts user is following 
+top_fol_tweets <- top_fol %>%
+  left_join(select(friends_df, screenName, description), by='screenName')
+
+tidy_decr <- top_fol %>%
+  unnest_tokens(word, description) %>%
+  mutate(word_stem = wordStem(word)) %>%
+  anti_join(stopwords, by="word") %>%
+  filter(!grepl("\\.|http", word))
+
+````
 
 
 
