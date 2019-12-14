@@ -1,6 +1,11 @@
 ---
 title: "The Impact of Key Players in the Twittersphere on financial markets"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
+  word_document: default
+  html_document:
+    df_print: paged
 ---
 
 
@@ -8,6 +13,13 @@ output: html_notebook
 
 
 ```{r}
+library(dplyr) 
+library(SnowballC)
+library(NLP)
+library(tm)
+library(RColorBrewer)
+library(wordcloud)
+
 library(jsonlite)
 
 # get path to all files in folder
@@ -33,14 +45,9 @@ for (i in file_names) {
 # Clean Data
 
 Process each twitter corpus with the below function.
+removal
 
 ```{r}
-library(dplyr) 
-library(SnowballC)
-library(NLP)
-library(tm)
-library(RColorBrewer)
-library(wordcloud)
 
 
 
@@ -51,16 +58,21 @@ clean_twitter_data <- function(dataset) {
     # remove redundant variables
     dataset = select(dataset, c('is_replied','is_reply_to','likes',"parent_tweet_id", 
                                 'screen_name',"replies", "retweets","text", 'timestamp'))
-  
+
+    # remove custom patterns
+    dataset$text = gsub("…", "", (dataset$text))
+    dataset$text = gsub("pdf", "", (dataset$text))
+    
+    # remove http (url to image)
+    dataset$text = gsub('https\\S+\\s*',"", dataset$text)
+    
     dataset[['text']] = tolower(dataset[['text']])
     dataset[['text']] = removePunctuation(dataset[['text']])
     dataset[['text']] = stripWhitespace(dataset[['text']])
     dataset[['text']] = removeNumbers(dataset[['text']])
     dataset[['text']] = removeWords(dataset[['text']], words=stopwords("en"))
     dataset[['text']] = stemDocument(dataset[['text']])
-    
-    # remove http (url to image)
-    data$text = gsub('http\\S+\\s*',"", data$text)
+  
     
     # convert to DateTime
     dataset["timestamp"] = 
@@ -75,6 +87,8 @@ data = clean_twitter_data(data)
 
 # variables
 names(data)
+
+head(data$text)
 
 ```
 
@@ -159,7 +173,7 @@ Other possible variable distinctions:
   
 
 
-# 
+# Corpus EDA
 
 ```{r}
 library(plotly)
@@ -169,66 +183,93 @@ library(broom)
 library(tidyr)
 library(tidytext)
 library(NLP)
+
 library(tm)
+library(wordcloud)
+library(SnowballC)
 
-prop.table(agg_tweets$mean_retweets)
+# proportions
+head(prop.table(agg_tweets$mean_retweets),10)
+head(prop.table(agg_tweets$n), 10)
 
-prop.table(agg_tweets$n)
-
-
-
-
-
-tm_map(VectorSource(data$text), removePunctuation)
-
-tm_map(cor)
+library(tinytex)
 
 
 
 
 prepare_for_NLP <- function(text_data) {
   "Prepare Corpus for NLP"
-  corpus <- Corpus(VectorSource(tex_data))      # create corpus
-  myDtm <- TermDocumentMatrix(corpus)           # doc x term matrix
+  corpus <- Corpus(VectorSource(text_data))      # create corpus
+  myDtm <- DocumentTermMatrix(corpus)           # doc x term matrix
   
-  print(paste("Most Common words: ", paste(findFreqTerms(myDtm, lowfreq=1000), collapse=", ")))
-  # removeSparseTerms(myDtm, sparse=.99)
+  # reduce sparsity
+  sparse = removeSparseTerms(myDtm, sparse=.99)
+  sparse = as.data.frame(as.matrix(sparse))
+  # colnames(sparse) = make.names(colnames(sparse))
+  
+  # freq of words
+  frequency_of_words = colSums(sparse)
+  frequency_of_words = frequency_of_words[order(frequency_of_words, decreasing=T)]
+
+  # arrange from most
+  print("Most frequently occuring words:")
+  print(head(frequency_of_words, 7))
+  
+  # create wordcloud
+  wordcloud(freq=as.vector(frequency_of_words), words=names(frequency_of_words),
+          colors=brewer.pal(9, "Blues")[4:9])
+  
+  # store results
+  res = list()
+  res$myDtm = myDtm
+  res$frequency_of_words = frequency_of_words
+  rescorpus = corpus
+  res$sparse = sparse
+  
+  return(res)
   
 }
 
 
-
-
-corpus <- Corpus(VectorSource(data$text))     
-myDtm <- TermDocumentMatrix(corpus)   
+res = prepare_for_NLP(data$text)
 
 
 
-
-?removeSparseTerms(myDtm)
-
-# reduce sparsity
-sparse = removeSparseTerms(myDtm, sparse=.995)
-sparse = as.data.frame(as.matrix(sparse))
-
-# transpose to make doc x term matrix
-sparse = t(sparse)
-dim(sparse)
-
-colnames(sparse) = make.names(colnames(sparse))
-
-
-
-wordcloud()
-colSums(sparse)
-
-DocumentTermMatrix(VectorSource(data$text)$content)
-
-```
+# find associated words: great feature of search
+print('words associated with "good"')
+findAssocs(res$myDtm, c('good'), 0.12)
   
 
 
+# Cluster the data
+install.packages('fpc')
+library(fpc)
 
+# k means clustering
+# d = dist(t(as.matrix(myDtm)), method='euclidean')
+# kfit = kmeans(d, 3)
+# summary(kfit)
+# head(kfit)
+
+
+
+```
+
+
+
+
+
+# Analysis using Tidy Text 
+
+```{r}
+library(tidytext)
+library(dplyr)
+library(stringr)
+
+
+
+
+```
 
 
 

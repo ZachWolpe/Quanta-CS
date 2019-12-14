@@ -1753,43 +1753,31 @@ summary {
 <h5>Twitter Influence Analysis</h5>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShqc29ubGl0ZSlcblxuIyBnZXQgcGF0aCB0byBhbGwgZmlsZXMgaW4gZm9sZGVyXG5maWxlX25hbWVzIDwtIGxpc3QuZmlsZXMocGF0aCA9IFwiLi4vLi4vZGF0YS90d2l0dGVyIC0gZmluYW5jZS9cIiwgcGF0dGVybiA9IFwianNvblwiLCBmdWxsLm5hbWVzPVRSVUUpXG5cblxuIyByZWFkIGluIGluZGl2aWR1YWwgZGF0YXNldHM6IGR5bmFtaWMgbmFtaW5nIFxuIyBmb3IgKGkgaW4gKDE6bGVuZ3RoKGZpbGVfbmFtZXMpKSkge1xuIyAgIGFzc2lnbih4PXBhc3RlKFwidHdpdHRlcl9cIixpLCBzZXA9XCJcIiksXG4jICAgICAgICAgIHZhbHVlPWZyb21KU09OKGZpbGVfbmFtZXNbaV0pKVxuIyB9XG5cblxuIyByZWFkIGluICArIGNvbWJpbmUgZGF0YVxuZGF0YSA9IGRhdGEuZnJhbWUoKVxuZm9yIChpIGluIGZpbGVfbmFtZXMpIHtcbiAgZGF0YSA9IHJiaW5kKGRhdGEsIGZyb21KU09OKGkpKVxufVxuXG5cbmBgYCJ9 -->
-<pre class="r"><code>library(jsonlite)
-
-# get path to all files in folder
-file_names &lt;- list.files(path = &quot;../../data/twitter - finance/&quot;, pattern = &quot;json&quot;, full.names=TRUE)
-
-
-# read in individual datasets: dynamic naming 
-# for (i in (1:length(file_names))) {
-#   assign(x=paste(&quot;twitter_&quot;,i, sep=&quot;&quot;),
-#          value=fromJSON(file_names[i]))
-# }
-
-
-# read in  + combine data
-data = data.frame()
-for (i in file_names) {
-  data = rbind(data, fromJSON(i))
-}
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaW5zdGFsbC5wYWNrYWdlcyhcInRpbnl0ZXhcIilcblxuYGBgIn0= -->
+<pre class="r"><code>install.packages(&quot;tinytex&quot;)
 </code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoidHJ5aW5nIFVSTCAnaHR0cHM6Ly9jcmFuLnJzdHVkaW8uY29tL2Jpbi9tYWNvc3gvZWwtY2FwaXRhbi9jb250cmliLzMuNi90aW55dGV4XzAuMTgudGd6J1xuQ29udGVudCB0eXBlICdhcHBsaWNhdGlvbi94LWd6aXAnIGxlbmd0aCA5ODM0OCBieXRlcyAoOTYgS0IpXG49PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxuZG93bmxvYWRlZCA5NiBLQlxuIn0= -->
+<pre><code>trying URL 'https://cran.rstudio.com/bin/macosx/el-capitan/contrib/3.6/tinytex_0.18.tgz'
+Content type 'application/x-gzip' length 98348 bytes (96 KB)
+==================================================
+downloaded 96 KB</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5UaGUgZG93bmxvYWRlZCBiaW5hcnkgcGFja2FnZXMgYXJlIGluXG5cdC92YXIvZm9sZGVycy8zMS8xZ202dDg1ajRkejFnaGc0NjcyMHgyNWMwMDAwZ24vVC8vUnRtcGZvWXczZy9kb3dubG9hZGVkX3BhY2thZ2VzXG4ifQ== -->
+<pre><code>
+The downloaded binary packages are in
+    /var/folders/31/1gm6t85j4dz1ghg46720x25c0000gn/T//RtmpfoYw3g/downloaded_packages</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
 <div id="clean-data" class="section level1">
 <h1>Clean Data</h1>
-<p>Process each twitter corpus with the below function.</p>
+<p>Process each twitter corpus with the below function. removal</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShkcGx5cikgXG5saWJyYXJ5KFNub3diYWxsQylcbmxpYnJhcnkoTkxQKVxubGlicmFyeSh0bSlcbmxpYnJhcnkoUkNvbG9yQnJld2VyKVxubGlicmFyeSh3b3JkY2xvdWQpXG5cblxuXG5cbmNsZWFuX3R3aXR0ZXJfZGF0YSA8LSBmdW5jdGlvbihkYXRhc2V0KSB7XG4gICAgXCJQcm9jZXNzIGVhY2ggVHdpdHRlciBmaWxlXCJcbiAgXG4gICAgIyByZW1vdmUgcmVkdW5kYW50IHZhcmlhYmxlc1xuICAgIGRhdGFzZXQgPSBzZWxlY3QoZGF0YXNldCwgYygnaXNfcmVwbGllZCcsJ2lzX3JlcGx5X3RvJywnbGlrZXMnLFwicGFyZW50X3R3ZWV0X2lkXCIsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnc2NyZWVuX25hbWUnLFwicmVwbGllc1wiLCBcInJldHdlZXRzXCIsXCJ0ZXh0XCIsICd0aW1lc3RhbXAnKSlcbiAgXG4gICAgIyBjaGFuZ2UgdG8gbG93ZXIgY2FzZVxuICAgIGRhdGFzZXRbWyd0ZXh0J11dID0gdG9sb3dlcihkYXRhc2V0W1sndGV4dCddXSlcbiAgICAjIHJlbW92ZSBwdW5jdHVhdGlvblxuICAgIGRhdGFzZXRbWyd0ZXh0J11dID0gcmVtb3ZlUHVuY3R1YXRpb24oZGF0YXNldFtbJ3RleHQnXV0pXG4gICAgIyByZW1vdmUgd2hpdGUgc3BhY2UgXG4gICAgZGF0YXNldFtbJ3RleHQnXV0gPSBzdHJpcFdoaXRlc3BhY2UoZGF0YXNldFtbJ3RleHQnXV0pXG4gICAgIyByZW1vdmUgbnVtYmVyIFxuICAgIGRhdGFzZXRbWyd0ZXh0J11dID0gcmVtb3ZlTnVtYmVycyhkYXRhc2V0W1sndGV4dCddXSlcbiAgICAjIHJlbW92ZSBzdG9wd29yZHNcbiAgICBkYXRhc2V0W1sndGV4dCddXSA9IHJlbW92ZVdvcmRzKGRhdGFzZXRbWyd0ZXh0J11dLCB3b3Jkcz1zdG9wd29yZHMoXCJlblwiKSlcbiAgICAjIHN0ZW0gZG9jdW1lbnRcbiAgICBkYXRhc2V0W1sndGV4dCddXSA9IHN0ZW1Eb2N1bWVudChkYXRhc2V0W1sndGV4dCddXSlcbiAgICBcbiAgICAjIHJlbW92ZSBodHRwICh1cmwgdG8gaW1hZ2UpXG4gICAgZGF0YSR0ZXh0ID0gZ3N1YignaHR0cFxcXFxTK1xcXFxzKicsXCJcIiwgZGF0YSR0ZXh0KVxuICAgIFxuICAgICMgY29udmVydCB0byBEYXRlVGltZVxuICAgIGRhdGFzZXRbXCJ0aW1lc3RhbXBcIl0gPSBcbiAgICAgIGFzLkRhdGUoZGF0YXNldFtcInRpbWVzdGFtcFwiXVsxOm5yb3coZGF0YXNldCksMV0sIGZvcm1hdD1cIiVZLSVtLSVkXCIpXG4gICAgXG4gICAgcmV0dXJuKGRhdGFzZXQpXG59XG5cbiMgY2xlYW4gXG5kYXRhID0gY2xlYW5fdHdpdHRlcl9kYXRhKGRhdGEpXG5cblxuIyB2YXJpYWJsZXNcbm5hbWVzKGRhdGEpXG5gYGAifQ== -->
-<pre class="r"><code>library(dplyr) 
-library(SnowballC)
-library(NLP)
-library(tm)
-library(RColorBrewer)
-library(wordcloud)
-
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5cblxuXG5jbGVhbl90d2l0dGVyX2RhdGEgPC0gZnVuY3Rpb24oZGF0YXNldCkge1xuICAgIFwiUHJvY2VzcyBlYWNoIFR3aXR0ZXIgZmlsZVwiXG4gIFxuICAgICMgcmVtb3ZlIHJlZHVuZGFudCB2YXJpYWJsZXNcbiAgICBkYXRhc2V0ID0gc2VsZWN0KGRhdGFzZXQsIGMoJ2lzX3JlcGxpZWQnLCdpc19yZXBseV90bycsJ2xpa2VzJyxcInBhcmVudF90d2VldF9pZFwiLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ3NjcmVlbl9uYW1lJyxcInJlcGxpZXNcIiwgXCJyZXR3ZWV0c1wiLFwidGV4dFwiLCAndGltZXN0YW1wJykpXG5cbiAgICAjIHJlbW92ZSBjdXN0b20gcGF0dGVybnNcbiAgICBkYXRhc2V0JHRleHQgPSBnc3ViKFwi4oCmXCIsIFwiXCIsIChkYXRhc2V0JHRleHQpKVxuICAgIGRhdGFzZXQkdGV4dCA9IGdzdWIoXCJwZGZcIiwgXCJcIiwgKGRhdGFzZXQkdGV4dCkpXG4gICAgXG4gICAgIyByZW1vdmUgaHR0cCAodXJsIHRvIGltYWdlKVxuICAgIGRhdGFzZXQkdGV4dCA9IGdzdWIoJ2h0dHBzXFxcXFMrXFxcXHMqJyxcIlwiLCBkYXRhc2V0JHRleHQpXG4gICAgXG4gICAgZGF0YXNldFtbJ3RleHQnXV0gPSB0b2xvd2VyKGRhdGFzZXRbWyd0ZXh0J11dKVxuICAgIGRhdGFzZXRbWyd0ZXh0J11dID0gcmVtb3ZlUHVuY3R1YXRpb24oZGF0YXNldFtbJ3RleHQnXV0pXG4gICAgZGF0YXNldFtbJ3RleHQnXV0gPSBzdHJpcFdoaXRlc3BhY2UoZGF0YXNldFtbJ3RleHQnXV0pXG4gICAgZGF0YXNldFtbJ3RleHQnXV0gPSByZW1vdmVOdW1iZXJzKGRhdGFzZXRbWyd0ZXh0J11dKVxuICAgIGRhdGFzZXRbWyd0ZXh0J11dID0gcmVtb3ZlV29yZHMoZGF0YXNldFtbJ3RleHQnXV0sIHdvcmRzPXN0b3B3b3JkcyhcImVuXCIpKVxuICAgIGRhdGFzZXRbWyd0ZXh0J11dID0gc3RlbURvY3VtZW50KGRhdGFzZXRbWyd0ZXh0J11dKVxuICBcbiAgICBcbiAgICAjIGNvbnZlcnQgdG8gRGF0ZVRpbWVcbiAgICBkYXRhc2V0W1widGltZXN0YW1wXCJdID0gXG4gICAgICBhcy5EYXRlKGRhdGFzZXRbXCJ0aW1lc3RhbXBcIl1bMTpucm93KGRhdGFzZXQpLDFdLCBmb3JtYXQ9XCIlWS0lbS0lZFwiKVxuICAgIFxuICAgIHJldHVybihkYXRhc2V0KVxufVxuXG4jIGNsZWFuIFxuZGF0YSA9IGNsZWFuX3R3aXR0ZXJfZGF0YShkYXRhKVxuXG5cbiMgdmFyaWFibGVzXG5uYW1lcyhkYXRhKVxuYGBgIn0= -->
+<pre class="r"><code>
 
 
 
@@ -1799,22 +1787,21 @@ clean_twitter_data &lt;- function(dataset) {
     # remove redundant variables
     dataset = select(dataset, c('is_replied','is_reply_to','likes',&quot;parent_tweet_id&quot;, 
                                 'screen_name',&quot;replies&quot;, &quot;retweets&quot;,&quot;text&quot;, 'timestamp'))
-  
-    # change to lower case
-    dataset[['text']] = tolower(dataset[['text']])
-    # remove punctuation
-    dataset[['text']] = removePunctuation(dataset[['text']])
-    # remove white space 
-    dataset[['text']] = stripWhitespace(dataset[['text']])
-    # remove number 
-    dataset[['text']] = removeNumbers(dataset[['text']])
-    # remove stopwords
-    dataset[['text']] = removeWords(dataset[['text']], words=stopwords(&quot;en&quot;))
-    # stem document
-    dataset[['text']] = stemDocument(dataset[['text']])
+
+    # remove custom patterns
+    dataset$text = gsub(&quot;…&quot;, &quot;&quot;, (dataset$text))
+    dataset$text = gsub(&quot;pdf&quot;, &quot;&quot;, (dataset$text))
     
     # remove http (url to image)
-    data$text = gsub('http\\S+\\s*',&quot;&quot;, data$text)
+    dataset$text = gsub('https\\S+\\s*',&quot;&quot;, dataset$text)
+    
+    dataset[['text']] = tolower(dataset[['text']])
+    dataset[['text']] = removePunctuation(dataset[['text']])
+    dataset[['text']] = stripWhitespace(dataset[['text']])
+    dataset[['text']] = removeNumbers(dataset[['text']])
+    dataset[['text']] = removeWords(dataset[['text']], words=stopwords(&quot;en&quot;))
+    dataset[['text']] = stemDocument(dataset[['text']])
+  
     
     # convert to DateTime
     dataset[&quot;timestamp&quot;] = 
@@ -1834,6 +1821,17 @@ names(data)</code></pre>
 <pre><code>[1] &quot;is_replied&quot;      &quot;is_reply_to&quot;     &quot;likes&quot;           &quot;parent_tweet_id&quot; &quot;screen_name&quot;    
 [6] &quot;replies&quot;         &quot;retweets&quot;        &quot;text&quot;            &quot;timestamp&quot;      </code></pre>
 <!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGVhZChkYXRhJHRleHQpXG5gYGAifQ== -->
+<pre class="r"><code>head(data$text)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiZ3JlYXQgb3Bwb3J0dW4gbWV0YWlyIHdpbGwgZW5nYWcgYm9hcmQgc2hhcmVob2xkIGV4cGxvciBiZXN0IHdheSB1bmxvY2sgc2hhcmVob2xkIHZhbHVcIlxuWzJdIFwiaW5mb2dyYXBoIGpzZSBzaGFyZSBjYW5ub25hc3NldFwiICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuWzNdIFwiYnVzaSBtYXZlcmljayBhbmFseXNpIHJhbWFwaG9zYSB3cm9uZyBzb2UgdGltY29oZW5cIiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuWzRdIFwic3BlY2lhbCByZXBvcnQgbmVlZCBnZHAgZ3Jvd3RoIHBhcnQgdmlhIG1vbmV5d2ViXCIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuWzVdIFwic3BlY2lhbCByZXBvcnQgbmVlZCBnZHAgZ3Jvd3RoIHBhcnQgdmlhIG1vbmV5d2ViXCIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuWzZdIFwiYnVzaSBtYXZlcmljayB3ZWxjb20gc3RhZ2Ugc2l4IGxvYWQgc2hlZCBzYSBjYW4gcHJvYmFibCBraXNzIGdkcCBncm93dGggZ29vZGJ5XCIgICAgICAgIFxuIn0= -->
+<pre><code>[1] &quot;great opportun metair will engag board sharehold explor best way unlock sharehold valu&quot;
+[2] &quot;infograph jse share cannonasset&quot;                                                       
+[3] &quot;busi maverick analysi ramaphosa wrong soe timcohen&quot;                                    
+[4] &quot;special report need gdp growth part via moneyweb&quot;                                      
+[5] &quot;special report need gdp growth part via moneyweb&quot;                                      
+[6] &quot;busi maverick welcom stage six load shed sa can probabl kiss gdp growth goodby&quot;        </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -1841,19 +1839,10 @@ names(data)</code></pre>
 <h1>Distribution of Likes</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3Bsb3QyKVxuYGBgIn0= -->
-<pre class="r"><code>library(ggplot2)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5BdHRhY2hpbmcgcGFja2FnZTog4oCYZ2dwbG90MuKAmVxuXG5UaGUgZm9sbG93aW5nIG9iamVjdCBpcyBtYXNrZWQgZnJvbSDigJhwYWNrYWdlOk5MUOKAmTpcblxuICAgIGFubm90YXRlXG4ifQ== -->
-<pre><code>
-Attaching package: ‘ggplot2’
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3Bsb3QyKVxuXG5nZ3Bsb3QoZGF0YSwgYWVzKHg9bGlrZXMpKSArIGdlb21faGlzdG9ncmFtKGJpbnM9MTAwLCBjb2w9J2JsdWUnKSArIFxuICBnZ3RpdGxlKFwiRGlzdHJpYnV0aW9uIG9mIExpa2VzXCIpICsgbGltcyh4PWMoMSwxMDApLCB5PWMoMCw2MDApKSBcbmBgYCJ9 -->
+<pre class="r"><code>library(ggplot2)
 
-The following object is masked from ‘package:NLP’:
-
-    annotate</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGEsIGFlcyh4PWxpa2VzKSkgKyBnZW9tX2hpc3RvZ3JhbShiaW5zPTEwMCwgY29sPSdibHVlJykgKyBcbiAgZ2d0aXRsZShcIkRpc3RyaWJ1dGlvbiBvZiBMaWtlc1wiKSArIGxpbXMoeD1jKDEsMTAwKSwgeT1jKDAsNjAwKSkgXG5gYGAifQ== -->
-<pre class="r"><code>ggplot(data, aes(x=likes)) + geom_histogram(bins=100, col='blue') + 
+ggplot(data, aes(x=likes)) + geom_histogram(bins=100, col='blue') + 
   ggtitle(&quot;Distribution of Likes&quot;) + lims(x=c(1,100), y=c(0,600)) </code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-plot-begin eyJjb25kaXRpb25zIjpbWzEsIlJlbW92ZWQgNzI1NiByb3dzIGNvbnRhaW5pbmcgbm9uLWZpbml0ZSB2YWx1ZXMgKHN0YXRfYmluKS4iXSxbMSwiUmVtb3ZlZCAyIHJvd3MgY29udGFpbmluZyBtaXNzaW5nIHZhbHVlcyAoZ2VvbV9iYXIpLiJdXSwiaGVpZ2h0Ijo0MzIuNjMyOSwic2l6ZV9iZWhhdmlvciI6MCwid2lkdGgiOjcwMH0= -->
@@ -1917,7 +1906,7 @@ agg_tweets = data %&gt;% select(screen_name, retweets) %&gt;%
 
 head(agg_tweets)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibmNvbCI6NCwibnJvdyI6Nn0sInJkZiI6Ikg0c0lBQUFBQUFBQUE1VlNUVXNETVJETmZyVjJ0YVhnNytpQzlPSlJzWGdRdlBnQnZZWFpOSzJMMjJUSlpxa0lnai9OMytXaDY2VE5GTHNuWFpqTjVHVXliOTVrSG1iemFUcFBHV01SaTNvQml4SjBXZkw4ZER1NVpDd09jUk93bUEzYytvWkI1K2pFYUdPMG5qL29jYjZCZC9DN00zNjlOSVVBOWFpTDBtTW5QQzhiYUF6RkRIbXUxYXJZeUJMVWlzQSt6eHRiM090RHpPenVCcXFxRWFKUUdvSFJqdktQMzlYSGwvZWlvYjhYb0lXL1Z1OGZhVXhFQ1hYdDlSMUFDM2twMGRtNnN2NlRUY0ZhVXJiWWc2ZTFNRklxN3M1STZscUM0a2JhalpTMnBqalVMc0dBRXBLZ1FIVUlCa1p2TWlKeGxZV2YrR3ZiOW5zZkdMWWRLZWtDTEdSTDQ3aDNlbzdTOVhWbEM2MHdXZWplT2VsY0Rrd0hHRGZLa1M4bTRxVlJyNU9McVdQd1BXRytvc0QzaS94NHp4bFJaUWtOa2NTQlVOU1JwSVJjMHZTTVVPVk9aRmFaUWxtU2dtaWRXVzJCNGxLaFMwTDJqN1g5QWNlQTdZM2ZBZ0FBIn0= -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbInRibF9kZiIsInRibCIsImRhdGEuZnJhbWUiXSwibmNvbCI6NCwibnJvdyI6Nn0sInJkZiI6Ikg0c0lBQUFBQUFBQUE1VlNUVS9ETUF4TnZ6WlcyRURpZDZ3WGhNUVJ4TVFCaVFzZjBtNlJtMldqb2t1cU5GVVJFaEkvamQvRmdlSnM4Y1I2Z2twdW5CZkh6OC94L1d4K2xzNVR4bGpFb2tIQW9nUmRsanc5M2t3dkdJdEQzQVFzWmlPM3ZtTFFLVG94MmduYXdCOE1PRy9oRGZ6dWlGOHRUU0ZBUGVpaTlOZ0J6OHNHR2tNeFk1NXJ0U3BhV1lKYUVUamtlV09MTzcyTG1kMWVRMVUxUWhSS0l6RFpVUDd4dTN6LzlGNDA5dmNDdFBEWDZ2MDlqWWtvb2E2OXZoMW9JUzhsT3QrdXJQOWtVN0NXbEMzMjRHRXRqSlNLdXpPU3VwYWd1SkcybGRMV0ZJZmFKUmhRUWhJVXFCN0J5T2cySXhKWFdmaUJ2NjdydnJhQllkZVRraTdBUXJZMGpudWpaeS9kVUZlMjBBcVRoZTZkazk3bHdQU0E0MFk1OHNWVVBEZnFaWHJ1Q0h4TG1DOG84TzBpUDk1U1JsUllRak1rY1I0VU5TUXBJWmMwUEJNVXVkR1lWYVpRbHBRZ1dtZFdXNkM0Vk9pU2tPMWJmZjhBRXAyMXk5NENBQUE9In0= -->
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["screen_name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["mean_retweets"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["appearances"],"name":[3],"type":["S3: table"],"align":["right"]},{"label":["n"],"name":[4],"type":["int"],"align":["right"]}],"data":[{"1":"__waza","2":"0","3":"1","4":"1"},{"1":"_AfricanSoil","2":"0","3":"2","4":"2"},{"1":"_bluaura","2":"0","3":"1","4":"1"},{"1":"_bongiwelanga","2":"0","3":"2","4":"2"},{"1":"_butiMo","2":"0","3":"2","4":"2"},{"1":"_DJCappuccino","2":"476","3":"1","4":"1"}],"options":{"columns":{"min":{},"max":[10],"total":[4]},"rows":{"min":[10],"max":[10],"total":[6]},"pages":{}}}
@@ -1972,37 +1961,110 @@ NA</code></pre>
 <li>replies</li>
 </ul>
 </div>
-<div id="section" class="section level1">
-<h1></h1>
+<div id="corpus-eda" class="section level1">
+<h1>Corpus EDA</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3BhcnNlID0gYXMuZGF0YS5mcmFtZShhcy5tYXRyaXgobXlEdG0pKVxuc3BhcnNlID0gYXMuZGF0YS5mcmFtZShhcy5tYXRyaXgobXlEdG0pKVxuIyB0cmFuc3Bvc2UgdG8gbWFrZSBkb2MgeCB0ZXJtIG1hdHJpeFxuc3BhcnNlID0gdChzcGFyc2UpXG5kaW0oc3BhcnNlKVxuXG5gYGAifQ== -->
-<pre class="r"><code>sparse = as.data.frame(as.matrix(myDtm))
-sparse = as.data.frame(as.matrix(myDtm))
-# transpose to make doc x term matrix
-sparse = t(sparse)
-dim(sparse)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGlueXRleDo6aW5zdGFsbF90aW55dGV4KClcblxuYGBgIn0= -->
+<pre class="r"><code>tinytex::install_tinytex()
 </code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDEyNTI3IDI3NzUxXG4ifQ== -->
-<pre><code>[1] 12527 27751</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiVGhlIGRpcmVjdG9yeSAvdXNyL2xvY2FsL2JpbiBpcyBub3Qgd3JpdGFibGUuIEkgcmVjb21tZW5kIHRoYXQgeW91IG1ha2UgaXQgd3JpdGFibGUuIFNlZSBodHRwczovL2dpdGh1Yi5jb20veWlodWkvdGlueXRleC9pc3N1ZXMvMjQgZm9yIG1vcmUgaW5mby5cbiJ9 -->
+<pre><code>The directory /usr/local/bin is not writable. I recommend that you make it writable. See https://github.com/yihui/tinytex/issues/24 for more info.</code></pre>
 <!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGltKHNwYXJzZSlcbmBgYCJ9 -->
-<pre class="r"><code>dim(sparse)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDEyNTI3IDI3NzUxXG4ifQ== -->
-<pre><code>[1] 12527 27751</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoidHJ5aW5nIFVSTCAnaHR0cHM6Ly95aWh1aS5vcmcvZ2gvdGlueXRleC90b29scy9pbnN0YWxsLXVueC5zaCdcbkNvbnRlbnQgdHlwZSAndGV4dC9wbGFpbjsgY2hhcnNldD11dGYtOCcgbGVuZ3RoIDYxNCBieXRlc1xuPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cbmRvd25sb2FkZWQgNjE0IGJ5dGVzXG4ifQ== -->
+<pre><code>trying URL 'https://yihui.org/gh/tinytex/tools/install-unx.sh'
+Content type 'text/plain; charset=utf-8' length 614 bytes
+==================================================
+downloaded 614 bytes</code></pre>
 <!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyByZWR1Y2Ugc3BhcnNpdHlcbnNwYXJzZSA9IHJlbW92ZVNwYXJzZVRlcm1zKG15RHRtLCBzcGFyc2U9Ljk5NSlcbmBgYCJ9 -->
-<pre class="r"><code># reduce sparsity
-sparse = removeSparseTerms(myDtm, sparse=.995)</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiRG93bmxvYWRpbmcgaW5zdGFsbC10bC11bngudGFyLmd6IHRvIC92YXIvZm9sZGVycy8zMS8xZ202dDg1ajRkejFnaGc0NjcyMHgyNWMwMDAwZ24vVCAuLi5cbiJ9 -->
+<pre><code>Downloading install-tl-unx.tar.gz to /var/folders/31/1gm6t85j4dz1ghg46720x25c0000gn/T ...</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAlIFRvdGFsICAgICUgUmVjZWl2ZWQgJSBYZmVyZCAgQXZlcmFnZSBTcGVlZCAgIFRpbWUgICAgVGltZSAgICAgVGltZSAgQ3VycmVudFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgRGxvYWQgIFVwbG9hZCAgIFRvdGFsICAgU3BlbnQgICAgTGVmdCAgU3BlZWRcblxuICAwICAgICAwICAgIDAgICAgIDAgICAgMCAgICAgMCAgICAgIDAgICAgICAwIC0tOi0tOi0tIC0tOi0tOi0tIC0tOi0tOi0tICAgICAwXG4xMDAgICAzMzcgIDEwMCAgIDMzNyAgICAwICAgICAwICAgIDgwMCAgICAgIDAgLS06LS06LS0gLS06LS06LS0gLS06LS06LS0gICA4MDBcblxuICAwIDM4NTVrICAgIDAgIDczMDAgICAgMCAgICAgMCAgMTMxNTMgICAgICAwICAwOjA1OjAwIC0tOi0tOi0tICAwOjA1OjAwIDEzMTUzXG4gNTAgMzg1NWsgICA1MCAxOTU3ayAgICAwICAgICAwICAxMjg2ayAgICAgIDAgIDA6MDA6MDIgIDA6MDA6MDEgIDA6MDA6MDEgMjAxNGtcbjEwMCAzODU1ayAgMTAwIDM4NTVrICAgIDAgICAgIDAgIDE3MDlrICAgICAgMCAgMDowMDowMiAgMDowMDowMiAtLTotLTotLSAyMjY0a1xuICAlIFRvdGFsICAgICUgUmVjZWl2ZWQgJSBYZmVyZCAgQXZlcmFnZSBTcGVlZCAgIFRpbWUgICAgVGltZSAgICAgVGltZSAgQ3VycmVudFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgRGxvYWQgIFVwbG9hZCAgIFRvdGFsICAgU3BlbnQgICAgTGVmdCAgU3BlZWRcblxuICAwICAgICAwICAgIDAgICAgIDAgICAgMCAgICAgMCAgICAgIDAgICAgICAwIC0tOi0tOi0tIC0tOi0tOi0tIC0tOi0tOi0tICAgICAwXG4gIDAgICAgIDAgICAgMCAgICAgMCAgICAwICAgICAwICAgICAgMCAgICAgIDAgLS06LS06LS0gLS06LS06LS0gLS06LS06LS0gICAgIDBcbiAgMCAgICAgMCAgICAwICAgICAwICAgIDAgICAgIDAgICAgICAwICAgICAgMCAtLTotLTotLSAgMDowMDowMSAtLTotLTotLSAgICAgMFxuMTAwICAgIDgxICAxMDAgICAgODEgICAgMCAgICAgMCAgICAgNDkgICAgICAwICAwOjAwOjAxICAwOjAwOjAxIC0tOi0tOi0tICAgIDQ5XG5cbiAgMCAgICAgMCAgICAwICAgICAwICAgIDAgICAgIDAgICAgICAwICAgICAgMCAtLTotLTotLSAgMDowMDowMiAtLTotLTotLSAgICAgMFxuMTAwICAgMTQyICAxMDAgICAxNDIgICAgMCAgICAgMCAgICAgNTQgICAgICAwICAwOjAwOjAyICAwOjAwOjAyIC0tOi0tOi0tICAgMzg0XG5cbjEwMCAgIDI5NSAgMTAwICAgMjk1ICAgIDAgICAgIDAgICAgIDc5ICAgICAgMCAgMDowMDowMyAgMDowMDowMyAtLTotLTotLSAgICA3OVxuMTAwICAgMjk1ICAxMDAgICAyOTUgICAgMCAgICAgMCAgICAgNzkgICAgICAwICAwOjAwOjAzICAwOjAwOjAzIC0tOi0tOi0tICAgICAwXG5ta2RpcjogdGV4bGl2ZTogRmlsZSBleGlzdHNcbiJ9 -->
+<pre><code>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   337  100   337    0     0    800      0 --:--:-- --:--:-- --:--:--   800
+
+  0 3855k    0  7300    0     0  13153      0  0:05:00 --:--:--  0:05:00 13153
+ 50 3855k   50 1957k    0     0  1286k      0  0:00:02  0:00:01  0:00:01 2014k
+100 3855k  100 3855k    0     0  1709k      0  0:00:02  0:00:02 --:--:-- 2264k
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
+100    81  100    81    0     0     49      0  0:00:01  0:00:01 --:--:--    49
+
+  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0
+100   142  100   142    0     0     54      0  0:00:02  0:00:02 --:--:--   384
+
+100   295  100   295    0     0     79      0  0:00:03  0:00:03 --:--:--    79
+100   295  100   295    0     0     79      0  0:00:03  0:00:03 --:--:--     0
+mkdir: texlive: File exists</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQXV0b21hdGVkIFRlWCBMaXZlIGluc3RhbGxhdGlvbiB1c2luZyBwcm9maWxlOiAuLi90aW55dGV4LnByb2ZpbGVcbkxvYWRpbmcgaHR0cDovL2Z0cC5zdW4uYWMuemEvZnRwL0NUQU4vc3lzdGVtcy90ZXhsaXZlL3RsbmV0L3RscGtnL3RleGxpdmUudGxwZGJcbkluc3RhbGxpbmcgVGVYIExpdmUgMjAxOSBmcm9tOiBodHRwOi8vZnRwLnN1bi5hYy56YS9mdHAvQ1RBTi9zeXN0ZW1zL3RleGxpdmUvdGxuZXQgKG5vdCB2ZXJpZmllZClcblBsYXRmb3JtOiB4ODZfNjQtZGFyd2luID0+ICdNYWNPU1ggY3VycmVudCAoMTAuMTItKSBvbiB4ODZfNjQnXG5EaXN0cmlidXRpb246IG5ldCAgKGRvd25sb2FkaW5nKVxuVXNpbmcgVVJMOiBodHRwOi8vZnRwLnN1bi5hYy56YS9mdHAvQ1RBTi9zeXN0ZW1zL3RleGxpdmUvdGxuZXRcbkRpcmVjdG9yeSBmb3IgdGVtcG9yYXJ5IGZpbGVzOiAvdmFyL2ZvbGRlcnMvMzEvMWdtNnQ4NWo0ZHoxZ2hnNDY3MjB4MjVjMDAwMGduL1QvTUtZUXZwbmVBalxuSW5zdGFsbGluZyB0bzogLi9cbkluc3RhbGxpbmcgWzEvNywgdGltZS90b3RhbDogPz86Pz8vPz86Pz9dOiB0ZXhsaXZlLmluZnJhIFsyMTRrXVxuSW5zdGFsbGluZyBbMi83LCB0aW1lL3RvdGFsOiAwMDowMC8wMDowMF06IHRleGxpdmUuaW5mcmEueDg2XzY0LWRhcndpbiBbMzQya11cbkluc3RhbGxpbmcgWzMvNywgdGltZS90b3RhbDogMDA6MDAvMDA6MDBdOiBoeXBoZW4tYmFzZSBbMjJrXVxuSW5zdGFsbGluZyBbNC83LCB0aW1lL3RvdGFsOiAwMDowMC8wMDowMF06IGtwYXRoc2VhIFszMmtdXG5JbnN0YWxsaW5nIFs1LzcsIHRpbWUvdG90YWw6IDAwOjAxLzAwOjAxXToga3BhdGhzZWEueDg2XzY0LWRhcndpbiBbNDhrXVxuSW5zdGFsbGluZyBbNi83LCB0aW1lL3RvdGFsOiAwMDowMS8wMDowMV06IHRldGV4IFs3MmtdXG5JbnN0YWxsaW5nIFs3LzcsIHRpbWUvdG90YWw6IDAwOjAxLzAwOjAxXTogdGV0ZXgueDg2XzY0LWRhcndpbiBbMWtdXG5UaW1lIHVzZWQgZm9yIGluc3RhbGxpbmcgdGhlIHBhY2thZ2VzOiAwMDowMVxucnVubmluZyBta3RleGxzciAuL3RleG1mLWRpc3QgLi4uXG53cml0aW5nIGZtdHV0aWwuY25mIHRvIC4vdGV4bWYtZGlzdC93ZWIyYy9mbXR1dGlsLmNuZlxud3JpdGluZyB1cGRtYXAuY2ZnIHRvIC4vdGV4bWYtZGlzdC93ZWIyYy91cGRtYXAuY2ZnXG53cml0aW5nIGxhbmd1YWdlLmRhdCB0byAuL3RleG1mLXZhci90ZXgvZ2VuZXJpYy9jb25maWcvbGFuZ3VhZ2UuZGF0XG53cml0aW5nIGxhbmd1YWdlLmRlZiB0byAuL3RleG1mLXZhci90ZXgvZ2VuZXJpYy9jb25maWcvbGFuZ3VhZ2UuZGVmXG53cml0aW5nIGxhbmd1YWdlLmRhdC5sdWEgdG8gLi90ZXhtZi12YXIvdGV4L2dlbmVyaWMvY29uZmlnL2xhbmd1YWdlLmRhdC5sdWFcbnJ1bm5pbmcgbWt0ZXhsc3IgLi90ZXhtZi12YXIgLi90ZXhtZi1jb25maWcgLi90ZXhtZi1kaXN0IC4uLlxucnVubmluZyB1cGRtYXAtc3lzIC0tbm9oYXNoIC4uLmRvbmVcbnJlLXJ1bm5pbmcgbWt0ZXhsc3IgLi90ZXhtZi12YXIgLi90ZXhtZi1jb25maWcgLi4uXG5wcmUtZ2VuZXJhdGluZyBhbGwgZm9ybWF0IGZpbGVzLCBiZSBwYXRpZW50Li4uXG5ydW5uaW5nIGZtdHV0aWwtc3lzIC0tbm8tZXJyb3ItaWYtbm8tZW5naW5lPWx1YWhidGV4LGx1YWppdHRleCxtZmx1YWppdCAtLW5vLXN0cmljdCAtLWFsbCAuLi5kb25lXG5ydW5uaW5nIHBhY2thZ2Utc3BlY2lmaWMgcG9zdGFjdGlvbnNcbmZpbmlzaGVkIHdpdGggcGFja2FnZS1zcGVjaWZpYyBwb3N0YWN0aW9uc1xuXG5Mb2dmaWxlOiAuL2luc3RhbGwtdGwubG9nXG50bG1ncjogc2V0dGluZyBkZWZhdWx0IHBhY2thZ2UgcmVwb3NpdG9yeSB0byBodHRwOi8vbWlycm9yLmN0YW4ub3JnL3N5c3RlbXMvdGV4bGl2ZS90bG5ldFxudGxtZ3I6IHVwZGF0aW5nIC9wcml2YXRlL3Zhci9mb2xkZXJzLzMxLzFnbTZ0ODVqNGR6MWdoZzQ2NzIweDI1YzAwMDBnbi9UL3RleGxpdmUvdGxwa2cvdGV4bGl2ZS50bHBkYlxuIn0= -->
+<pre><code>Automated TeX Live installation using profile: ../tinytex.profile
+Loading http://ftp.sun.ac.za/ftp/CTAN/systems/texlive/tlnet/tlpkg/texlive.tlpdb
+Installing TeX Live 2019 from: http://ftp.sun.ac.za/ftp/CTAN/systems/texlive/tlnet (not verified)
+Platform: x86_64-darwin =&gt; 'MacOSX current (10.12-) on x86_64'
+Distribution: net  (downloading)
+Using URL: http://ftp.sun.ac.za/ftp/CTAN/systems/texlive/tlnet
+Directory for temporary files: /var/folders/31/1gm6t85j4dz1ghg46720x25c0000gn/T/MKYQvpneAj
+Installing to: ./
+Installing [1/7, time/total: ??:??/??:??]: texlive.infra [214k]
+Installing [2/7, time/total: 00:00/00:00]: texlive.infra.x86_64-darwin [342k]
+Installing [3/7, time/total: 00:00/00:00]: hyphen-base [22k]
+Installing [4/7, time/total: 00:00/00:00]: kpathsea [32k]
+Installing [5/7, time/total: 00:01/00:01]: kpathsea.x86_64-darwin [48k]
+Installing [6/7, time/total: 00:01/00:01]: tetex [72k]
+Installing [7/7, time/total: 00:01/00:01]: tetex.x86_64-darwin [1k]
+Time used for installing the packages: 00:01
+running mktexlsr ./texmf-dist ...
+writing fmtutil.cnf to ./texmf-dist/web2c/fmtutil.cnf
+writing updmap.cfg to ./texmf-dist/web2c/updmap.cfg
+writing language.dat to ./texmf-var/tex/generic/config/language.dat
+writing language.def to ./texmf-var/tex/generic/config/language.def
+writing language.dat.lua to ./texmf-var/tex/generic/config/language.dat.lua
+running mktexlsr ./texmf-var ./texmf-config ./texmf-dist ...
+running updmap-sys --nohash ...done
+re-running mktexlsr ./texmf-var ./texmf-config ...
+pre-generating all format files, be patient...
+running fmtutil-sys --no-error-if-no-engine=luahbtex,luajittex,mfluajit --no-strict --all ...done
+running package-specific postactions
+finished with package-specific postactions
+
+Logfile: ./install-tl.log
+tlmgr: setting default package repository to http://mirror.ctan.org/systems/texlive/tlnet
+tlmgr: updating /private/var/folders/31/1gm6t85j4dz1ghg46720x25c0000gn/T/texlive/tlpkg/texlive.tlpdb</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3I6IEZhaWxlZCB0byBpbnN0YWxsIFRpbnlUZVhcbiJ9 -->
+<pre><code>Error: Failed to install TinyTeX</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="analysis-using-tidy-text" class="section level1">
+<h1>Analysis using Tidy Text</h1>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaW5zdGFsbC5wYWNrYWdlcygnY29udHJpYi51cmwnKVxuXG5gYGAifQ== -->
+<pre class="r"><code>install.packages('contrib.url')
+</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZyBpbiBpbnN0YWxsLnBhY2thZ2VzIDpcbiAgcGFja2FnZSDigJhjb250cmliLnVybOKAmSBpcyBub3QgYXZhaWxhYmxlIChmb3IgUiB2ZXJzaW9uIDMuNi4xKVxuIn0= -->
+<pre><code>Warning in install.packages :
+  package ‘contrib.url’ is not available (for R version 3.6.1)</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiVGhlIEltcGFjdCBvZiBLZXkgUGxheWVycyBpbiB0aGUgVHdpdHRlcnNwaGVyZSBvbiBmaW5hbmNpYWwgbWFya2V0cyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKCiMjIyMjIFR3aXR0ZXIgSW5mbHVlbmNlIEFuYWx5c2lzCgoKYGBge3J9CmxpYnJhcnkoanNvbmxpdGUpCgojIGdldCBwYXRoIHRvIGFsbCBmaWxlcyBpbiBmb2xkZXIKZmlsZV9uYW1lcyA8LSBsaXN0LmZpbGVzKHBhdGggPSAiLi4vLi4vZGF0YS90d2l0dGVyIC0gZmluYW5jZS8iLCBwYXR0ZXJuID0gImpzb24iLCBmdWxsLm5hbWVzPVRSVUUpCgoKIyByZWFkIGluIGluZGl2aWR1YWwgZGF0YXNldHM6IGR5bmFtaWMgbmFtaW5nIAojIGZvciAoaSBpbiAoMTpsZW5ndGgoZmlsZV9uYW1lcykpKSB7CiMgICBhc3NpZ24oeD1wYXN0ZSgidHdpdHRlcl8iLGksIHNlcD0iIiksCiMgICAgICAgICAgdmFsdWU9ZnJvbUpTT04oZmlsZV9uYW1lc1tpXSkpCiMgfQoKCiMgcmVhZCBpbiAgKyBjb21iaW5lIGRhdGEKZGF0YSA9IGRhdGEuZnJhbWUoKQpmb3IgKGkgaW4gZmlsZV9uYW1lcykgewogIGRhdGEgPSByYmluZChkYXRhLCBmcm9tSlNPTihpKSkKfQoKCmBgYAoKIyBDbGVhbiBEYXRhCgpQcm9jZXNzIGVhY2ggdHdpdHRlciBjb3JwdXMgd2l0aCB0aGUgYmVsb3cgZnVuY3Rpb24uCgpgYGB7cn0KbGlicmFyeShkcGx5cikgCmxpYnJhcnkoU25vd2JhbGxDKQpsaWJyYXJ5KE5MUCkKbGlicmFyeSh0bSkKbGlicmFyeShSQ29sb3JCcmV3ZXIpCmxpYnJhcnkod29yZGNsb3VkKQoKCgoKY2xlYW5fdHdpdHRlcl9kYXRhIDwtIGZ1bmN0aW9uKGRhdGFzZXQpIHsKICAgICJQcm9jZXNzIGVhY2ggVHdpdHRlciBmaWxlIgogIAogICAgIyByZW1vdmUgcmVkdW5kYW50IHZhcmlhYmxlcwogICAgZGF0YXNldCA9IHNlbGVjdChkYXRhc2V0LCBjKCdpc19yZXBsaWVkJywnaXNfcmVwbHlfdG8nLCdsaWtlcycsInBhcmVudF90d2VldF9pZCIsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdzY3JlZW5fbmFtZScsInJlcGxpZXMiLCAicmV0d2VldHMiLCJ0ZXh0IiwgJ3RpbWVzdGFtcCcpKQogIAogICAgZGF0YXNldFtbJ3RleHQnXV0gPSB0b2xvd2VyKGRhdGFzZXRbWyd0ZXh0J11dKQogICAgZGF0YXNldFtbJ3RleHQnXV0gPSByZW1vdmVQdW5jdHVhdGlvbihkYXRhc2V0W1sndGV4dCddXSkKICAgIGRhdGFzZXRbWyd0ZXh0J11dID0gc3RyaXBXaGl0ZXNwYWNlKGRhdGFzZXRbWyd0ZXh0J11dKQogICAgZGF0YXNldFtbJ3RleHQnXV0gPSByZW1vdmVOdW1iZXJzKGRhdGFzZXRbWyd0ZXh0J11dKQogICAgZGF0YXNldFtbJ3RleHQnXV0gPSByZW1vdmVXb3JkcyhkYXRhc2V0W1sndGV4dCddXSwgd29yZHM9c3RvcHdvcmRzKCJlbiIpKQogICAgZGF0YXNldFtbJ3RleHQnXV0gPSBzdGVtRG9jdW1lbnQoZGF0YXNldFtbJ3RleHQnXV0pCiAgICAKICAgICMgcmVtb3ZlIGh0dHAgKHVybCB0byBpbWFnZSkKICAgIGRhdGEkdGV4dCA9IGdzdWIoJ2h0dHBcXFMrXFxzKicsIiIsIGRhdGEkdGV4dCkKICAgIAogICAgIyBjb252ZXJ0IHRvIERhdGVUaW1lCiAgICBkYXRhc2V0WyJ0aW1lc3RhbXAiXSA9IAogICAgICBhcy5EYXRlKGRhdGFzZXRbInRpbWVzdGFtcCJdWzE6bnJvdyhkYXRhc2V0KSwxXSwgZm9ybWF0PSIlWS0lbS0lZCIpCiAgICAKICAgIHJldHVybihkYXRhc2V0KQp9CgojIGNsZWFuIApkYXRhID0gY2xlYW5fdHdpdHRlcl9kYXRhKGRhdGEpCgoKIyB2YXJpYWJsZXMKbmFtZXMoZGF0YSkKCmBgYAoKCiMgRGlzdHJpYnV0aW9uIG9mIExpa2VzCgpgYGB7cn0KbGlicmFyeShnZ3Bsb3QyKQoKZ2dwbG90KGRhdGEsIGFlcyh4PWxpa2VzKSkgKyBnZW9tX2hpc3RvZ3JhbShiaW5zPTEwMCwgY29sPSdibHVlJykgKyAKICBnZ3RpdGxlKCJEaXN0cmlidXRpb24gb2YgTGlrZXMiKSArIGxpbXMoeD1jKDEsMTAwKSwgeT1jKDAsNjAwKSkgCgpwcm9wX2xpa2VzX2Fib3ZlIDwtIGZ1bmN0aW9uKGRhdGEsIHRocmVzKSB7CiAgIkNvbXB1dGUgdGhlIHByb3BvcnRpb24gb2YgbGlrZXMgYWJvdmUgYSB0aHJlc2hvbGQiCiAgcmVzID0gYygpCiAgCiAgZm9yIChpIGluIHRocmVzKSB7CiAgICByZXMgPSBjKHJlcyxtZWFuKGRhdGE+aSkpCiAgICBwcmludChwYXN0ZSgicHJvcG9ydGlvbiBvZiB0d2VldHMgd2l0aCBsaWtlcyBhYm92ZSIsIGksICdpcycsIHJvdW5kKG1lYW4oZGF0YT5pKSwgZGlnaXRzPTQpKSkKICB9CiAgCiAgcmV0dXJuKGRhdGEuZnJhbWUocmVzKSkKfQoKCnByb3BvcnRpb25zID0gcHJvcF9saWtlc19hYm92ZShkYXRhJGxpa2VzLCBzZXEoMTAwLDEwMDAsMTAwKSkKCmBgYAoKCiMgVW5kZXJzdGFuZCB0aGUgRGF0YQoKQXJlIHRoZSBudW1iZXIgb2YgcmV0d2VldHMgaGVhdmlseSBza2V3ZWQgdG93YXJkcyBjZXJ0YWluIHVzZXJzPwoKIC0gSG93IG1hbnkgdHdlZXRzIGRvIHdlIHNlZSBwZXIgdXNlcj8KIC0gSG93IG1hbnkgYXZlcmFnZSByZXR3ZWV0cyBkbyB3ZSBzZWUgcGVyIHVzZXI/CiAtIEhvdyBkbyB0aGVzZSB0d28gZnJlcXVlbmNpZXMgcmVsYXRlPwogCmBgYHtyfQpwYXN0ZSgiTnVtYmVyIG9mIFVuaXF1ZSBBY2NvdW50cyBUd2VldGluZzogIiwgbGVuZ3RoKHVuaXF1ZShkYXRhJHNjcmVlbl9uYW1lKSkpCgojIG1lYW4gcmV0d2VldHMgcGVyIHVzZXIgJiB0d2VldHMgcGVyIGFjY291bnQKYWdnX3R3ZWV0cyA9IGRhdGEgJT4lIHNlbGVjdChzY3JlZW5fbmFtZSwgcmV0d2VldHMpICU+JSAKICBncm91cF9ieShzY3JlZW5fbmFtZSkgJT4lIHN1bW1hcmlzZShtZWFuX3JldHdlZXRzID0gcm91bmQobWVhbihyZXR3ZWV0cykpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFwcGVhcmFuY2VzID0gdGFibGUoc2NyZWVuX25hbWUpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG4gPSBuKCkpICMgc2FtZSBhcyBhcHBlYXJlbmNlcwoKCmhlYWQoYWdnX3R3ZWV0cykKCgpnZ3Bsb3QoYWdnX3R3ZWV0cywgYWVzKHg9c2NyZWVuX25hbWUsIHk9bWVhbl9yZXR3ZWV0cykpICsgZ2VvbV9jb3VudCgpICsgCiAgZ2d0aXRsZSgibWFqb3IgcmV0d2VldHMiKSArCiAgdGhlbWUoYXhpcy50ZXh0Lng9ZWxlbWVudF9ibGFuaygpLAogICAgICAgIGF4aXMudGlja3MueD1lbGVtZW50X2JsYW5rKCkpCgpnZ3Bsb3QoYWdnX3R3ZWV0cywgYWVzKHg9bWVhbl9yZXR3ZWV0cykpICsgZ2VvbV9oaXN0b2dyYW0oYmlucz0xMDAsIGNvbD0nb3JhbmdlJykgKwogIGdndGl0bGUoIkRpc3RyaWJ1dGlvbiBvZiBSZXR3ZWV0cyIpICsgbGltcyh4PWMoMSw1MCksIHk9YygwLDMwMCkpIAoKCmdncGxvdChhZ2dfdHdlZXRzLCBhZXMoeD1zY3JlZW5fbmFtZSwgeT1tZWFuX3JldHdlZXRzKSkgKyBnZW9tX2JhcihzdGF0PSJpZGVudGl0eSIpICsKICB0aGVtZShheGlzLnRleHQueD1lbGVtZW50X2JsYW5rKCksIGF4aXMudGlja3MueD1lbGVtZW50X2JsYW5rKCkpICsgCiAgZ2d0aXRsZSgiQWxtb3N0IGFsbCByZXR3ZWV0cyBhY3J1ZSB0byBhIGhhbmRmdWwgb2YgdXNlcnMiKQoKCmBgYAoKCkl0IHRoZW4sIG1heSBiZSBwb3NzaWJsZSB0byAqd2VpZ2h0KiB1c2VycyB0d2VldHMgYmFzZWQgb24gdGhlaXI6CgogIC0gQXZlcmFnZSBSZXR3ZWV0cyAKICAtIE51bWJlciBvZiBUd2VldHMKICAtIEludGVyYWN0aW9uOiBBdmVyYWdlIFJldHdlZXRzIHggTnVtYmVyIG9mIFR3ZWV0cwogIApUbyBtb3JlIGFjY3VyYWN0bHkgbW9kZWwgdGhlIHNlbnRpbWVudCBvZiB0aGUgcHVibGljIGJ5IGV4cHJlc3Npbmcgc2VudGltZW50IGFzIGEgd2VpZ2h0ZWQgZnVuY3Rpb24gb2YgaW5mbHVlbmNpYWwgcGxheWVycyBpbiB0aGUgVHdpdHRlcnNwaGVyZS4KCk90aGVyIHBvc3NpYmxlIHZhcmlhYmxlIGRpc3RpbmN0aW9uczoKCiAgLSBvd24gdHdlZXQgdnMgcmV0d2VldCBpbmZsdWVuY2UgCiAgLSByZXBsaWVzIAogIAogIAoKCiMgCgpgYGB7cn0KbGlicmFyeShwbG90bHkpCmxpYnJhcnkoUlNlbnRpbWVudCkKbGlicmFyeShzdHJpbmdyKQpsaWJyYXJ5KGJyb29tKQpsaWJyYXJ5KHRpZHlyKQpsaWJyYXJ5KHRpZHl0ZXh0KQpsaWJyYXJ5KE5MUCkKbGlicmFyeSh0bSkKCnByb3AudGFibGUoYWdnX3R3ZWV0cyRtZWFuX3JldHdlZXRzKQoKcHJvcC50YWJsZShhZ2dfdHdlZXRzJG4pCgoKCgoKdG1fbWFwKFZlY3RvclNvdXJjZShkYXRhJHRleHQpLCByZW1vdmVQdW5jdHVhdGlvbikKCnRtX21hcChjb3IpCgoKCgpwcmVwYXJlX2Zvcl9OTFAgPC0gZnVuY3Rpb24odGV4dF9kYXRhKSB7CiAgIlByZXBhcmUgQ29ycHVzIGZvciBOTFAiCiAgY29ycHVzIDwtIENvcnB1cyhWZWN0b3JTb3VyY2UodGV4X2RhdGEpKSAgICAgICMgY3JlYXRlIGNvcnB1cwogIG15RHRtIDwtIFRlcm1Eb2N1bWVudE1hdHJpeChjb3JwdXMpICAgICAgICAgICAjIGRvYyB4IHRlcm0gbWF0cml4CiAgCiAgcHJpbnQocGFzdGUoIk1vc3QgQ29tbW9uIHdvcmRzOiAiLCBwYXN0ZShmaW5kRnJlcVRlcm1zKG15RHRtLCBsb3dmcmVxPTEwMDApLCBjb2xsYXBzZT0iLCAiKSkpCiAgIyByZW1vdmVTcGFyc2VUZXJtcyhteUR0bSwgc3BhcnNlPS45OSkKICAKfQoKCgoKY29ycHVzIDwtIENvcnB1cyhWZWN0b3JTb3VyY2UoZGF0YSR0ZXh0KSkgICAgIApteUR0bSA8LSBUZXJtRG9jdW1lbnRNYXRyaXgoY29ycHVzKSAgIAoKCgoKP3JlbW92ZVNwYXJzZVRlcm1zKG15RHRtKQoKIyByZWR1Y2Ugc3BhcnNpdHkKc3BhcnNlID0gcmVtb3ZlU3BhcnNlVGVybXMobXlEdG0sIHNwYXJzZT0uOTk1KQpzcGFyc2UgPSBhcy5kYXRhLmZyYW1lKGFzLm1hdHJpeChzcGFyc2UpKQoKIyB0cmFuc3Bvc2UgdG8gbWFrZSBkb2MgeCB0ZXJtIG1hdHJpeApzcGFyc2UgPSB0KHNwYXJzZSkKZGltKHNwYXJzZSkKCmNvbG5hbWVzKHNwYXJzZSkgPSBtYWtlLm5hbWVzKGNvbG5hbWVzKHNwYXJzZSkpCgoKCndvcmRjbG91ZCgpCmNvbFN1bXMoc3BhcnNlKQoKRG9jdW1lbnRUZXJtTWF0cml4KFZlY3RvclNvdXJjZShkYXRhJHRleHQpJGNvbnRlbnQpCgpgYGAKICAKCgoKCgoKCgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiVGhlIEltcGFjdCBvZiBLZXkgUGxheWVycyBpbiB0aGUgVHdpdHRlcnNwaGVyZSBvbiBmaW5hbmNpYWwgbWFya2V0cyIKb3V0cHV0OgogIHBkZl9kb2N1bWVudDogZGVmYXVsdAogIGh0bWxfbm90ZWJvb2s6IGRlZmF1bHQKICB3b3JkX2RvY3VtZW50OiBkZWZhdWx0CiAgaHRtbF9kb2N1bWVudDoKICAgIGRmX3ByaW50OiBwYWdlZAotLS0KCgojIyMjIyBUd2l0dGVyIEluZmx1ZW5jZSBBbmFseXNpcwoKCmBgYHtyfQpsaWJyYXJ5KGRwbHlyKSAKbGlicmFyeShTbm93YmFsbEMpCmxpYnJhcnkoTkxQKQpsaWJyYXJ5KHRtKQpsaWJyYXJ5KFJDb2xvckJyZXdlcikKbGlicmFyeSh3b3JkY2xvdWQpCgpsaWJyYXJ5KGpzb25saXRlKQoKIyBnZXQgcGF0aCB0byBhbGwgZmlsZXMgaW4gZm9sZGVyCmZpbGVfbmFtZXMgPC0gbGlzdC5maWxlcyhwYXRoID0gIi4uLy4uL2RhdGEvdHdpdHRlciAtIGZpbmFuY2UvIiwgcGF0dGVybiA9ICJqc29uIiwgZnVsbC5uYW1lcz1UUlVFKQoKCiMgcmVhZCBpbiBpbmRpdmlkdWFsIGRhdGFzZXRzOiBkeW5hbWljIG5hbWluZyAKIyBmb3IgKGkgaW4gKDE6bGVuZ3RoKGZpbGVfbmFtZXMpKSkgewojICAgYXNzaWduKHg9cGFzdGUoInR3aXR0ZXJfIixpLCBzZXA9IiIpLAojICAgICAgICAgIHZhbHVlPWZyb21KU09OKGZpbGVfbmFtZXNbaV0pKQojIH0KCgojIHJlYWQgaW4gICsgY29tYmluZSBkYXRhCmRhdGEgPSBkYXRhLmZyYW1lKCkKZm9yIChpIGluIGZpbGVfbmFtZXMpIHsKICBkYXRhID0gcmJpbmQoZGF0YSwgZnJvbUpTT04oaSkpCn0KCgpgYGAKCiMgQ2xlYW4gRGF0YQoKUHJvY2VzcyBlYWNoIHR3aXR0ZXIgY29ycHVzIHdpdGggdGhlIGJlbG93IGZ1bmN0aW9uLgpyZW1vdmFsCgpgYGB7cn0KCgoKCmNsZWFuX3R3aXR0ZXJfZGF0YSA8LSBmdW5jdGlvbihkYXRhc2V0KSB7CiAgICAiUHJvY2VzcyBlYWNoIFR3aXR0ZXIgZmlsZSIKICAKICAgICMgcmVtb3ZlIHJlZHVuZGFudCB2YXJpYWJsZXMKICAgIGRhdGFzZXQgPSBzZWxlY3QoZGF0YXNldCwgYygnaXNfcmVwbGllZCcsJ2lzX3JlcGx5X3RvJywnbGlrZXMnLCJwYXJlbnRfdHdlZXRfaWQiLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnc2NyZWVuX25hbWUnLCJyZXBsaWVzIiwgInJldHdlZXRzIiwidGV4dCIsICd0aW1lc3RhbXAnKSkKCiAgICAjIHJlbW92ZSBjdXN0b20gcGF0dGVybnMKICAgIGRhdGFzZXQkdGV4dCA9IGdzdWIoIuKApiIsICIiLCAoZGF0YXNldCR0ZXh0KSkKICAgIGRhdGFzZXQkdGV4dCA9IGdzdWIoInBkZiIsICIiLCAoZGF0YXNldCR0ZXh0KSkKICAgIAogICAgIyByZW1vdmUgaHR0cCAodXJsIHRvIGltYWdlKQogICAgZGF0YXNldCR0ZXh0ID0gZ3N1YignaHR0cHNcXFMrXFxzKicsIiIsIGRhdGFzZXQkdGV4dCkKICAgIAogICAgZGF0YXNldFtbJ3RleHQnXV0gPSB0b2xvd2VyKGRhdGFzZXRbWyd0ZXh0J11dKQogICAgZGF0YXNldFtbJ3RleHQnXV0gPSByZW1vdmVQdW5jdHVhdGlvbihkYXRhc2V0W1sndGV4dCddXSkKICAgIGRhdGFzZXRbWyd0ZXh0J11dID0gc3RyaXBXaGl0ZXNwYWNlKGRhdGFzZXRbWyd0ZXh0J11dKQogICAgZGF0YXNldFtbJ3RleHQnXV0gPSByZW1vdmVOdW1iZXJzKGRhdGFzZXRbWyd0ZXh0J11dKQogICAgZGF0YXNldFtbJ3RleHQnXV0gPSByZW1vdmVXb3JkcyhkYXRhc2V0W1sndGV4dCddXSwgd29yZHM9c3RvcHdvcmRzKCJlbiIpKQogICAgZGF0YXNldFtbJ3RleHQnXV0gPSBzdGVtRG9jdW1lbnQoZGF0YXNldFtbJ3RleHQnXV0pCiAgCiAgICAKICAgICMgY29udmVydCB0byBEYXRlVGltZQogICAgZGF0YXNldFsidGltZXN0YW1wIl0gPSAKICAgICAgYXMuRGF0ZShkYXRhc2V0WyJ0aW1lc3RhbXAiXVsxOm5yb3coZGF0YXNldCksMV0sIGZvcm1hdD0iJVktJW0tJWQiKQogICAgCiAgICByZXR1cm4oZGF0YXNldCkKfQoKIyBjbGVhbiAKZGF0YSA9IGNsZWFuX3R3aXR0ZXJfZGF0YShkYXRhKQoKCiMgdmFyaWFibGVzCm5hbWVzKGRhdGEpCgpoZWFkKGRhdGEkdGV4dCkKCmBgYAoKCiMgRGlzdHJpYnV0aW9uIG9mIExpa2VzCgpgYGB7cn0KbGlicmFyeShnZ3Bsb3QyKQoKZ2dwbG90KGRhdGEsIGFlcyh4PWxpa2VzKSkgKyBnZW9tX2hpc3RvZ3JhbShiaW5zPTEwMCwgY29sPSdibHVlJykgKyAKICBnZ3RpdGxlKCJEaXN0cmlidXRpb24gb2YgTGlrZXMiKSArIGxpbXMoeD1jKDEsMTAwKSwgeT1jKDAsNjAwKSkgCgpwcm9wX2xpa2VzX2Fib3ZlIDwtIGZ1bmN0aW9uKGRhdGEsIHRocmVzKSB7CiAgIkNvbXB1dGUgdGhlIHByb3BvcnRpb24gb2YgbGlrZXMgYWJvdmUgYSB0aHJlc2hvbGQiCiAgcmVzID0gYygpCiAgCiAgZm9yIChpIGluIHRocmVzKSB7CiAgICByZXMgPSBjKHJlcyxtZWFuKGRhdGE+aSkpCiAgICBwcmludChwYXN0ZSgicHJvcG9ydGlvbiBvZiB0d2VldHMgd2l0aCBsaWtlcyBhYm92ZSIsIGksICdpcycsIHJvdW5kKG1lYW4oZGF0YT5pKSwgZGlnaXRzPTQpKSkKICB9CiAgCiAgcmV0dXJuKGRhdGEuZnJhbWUocmVzKSkKfQoKCnByb3BvcnRpb25zID0gcHJvcF9saWtlc19hYm92ZShkYXRhJGxpa2VzLCBzZXEoMTAwLDEwMDAsMTAwKSkKCmBgYAoKCiMgVW5kZXJzdGFuZCB0aGUgRGF0YQoKQXJlIHRoZSBudW1iZXIgb2YgcmV0d2VldHMgaGVhdmlseSBza2V3ZWQgdG93YXJkcyBjZXJ0YWluIHVzZXJzPwoKIC0gSG93IG1hbnkgdHdlZXRzIGRvIHdlIHNlZSBwZXIgdXNlcj8KIC0gSG93IG1hbnkgYXZlcmFnZSByZXR3ZWV0cyBkbyB3ZSBzZWUgcGVyIHVzZXI/CiAtIEhvdyBkbyB0aGVzZSB0d28gZnJlcXVlbmNpZXMgcmVsYXRlPwogCmBgYHtyfQpwYXN0ZSgiTnVtYmVyIG9mIFVuaXF1ZSBBY2NvdW50cyBUd2VldGluZzogIiwgbGVuZ3RoKHVuaXF1ZShkYXRhJHNjcmVlbl9uYW1lKSkpCgojIG1lYW4gcmV0d2VldHMgcGVyIHVzZXIgJiB0d2VldHMgcGVyIGFjY291bnQKYWdnX3R3ZWV0cyA9IGRhdGEgJT4lIHNlbGVjdChzY3JlZW5fbmFtZSwgcmV0d2VldHMpICU+JSAKICBncm91cF9ieShzY3JlZW5fbmFtZSkgJT4lIHN1bW1hcmlzZShtZWFuX3JldHdlZXRzID0gcm91bmQobWVhbihyZXR3ZWV0cykpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFwcGVhcmFuY2VzID0gdGFibGUoc2NyZWVuX25hbWUpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG4gPSBuKCkpICMgc2FtZSBhcyBhcHBlYXJlbmNlcwoKCmhlYWQoYWdnX3R3ZWV0cykKCgpnZ3Bsb3QoYWdnX3R3ZWV0cywgYWVzKHg9c2NyZWVuX25hbWUsIHk9bWVhbl9yZXR3ZWV0cykpICsgZ2VvbV9jb3VudCgpICsgCiAgZ2d0aXRsZSgibWFqb3IgcmV0d2VldHMiKSArCiAgdGhlbWUoYXhpcy50ZXh0Lng9ZWxlbWVudF9ibGFuaygpLAogICAgICAgIGF4aXMudGlja3MueD1lbGVtZW50X2JsYW5rKCkpCgpnZ3Bsb3QoYWdnX3R3ZWV0cywgYWVzKHg9bWVhbl9yZXR3ZWV0cykpICsgZ2VvbV9oaXN0b2dyYW0oYmlucz0xMDAsIGNvbD0nb3JhbmdlJykgKwogIGdndGl0bGUoIkRpc3RyaWJ1dGlvbiBvZiBSZXR3ZWV0cyIpICsgbGltcyh4PWMoMSw1MCksIHk9YygwLDMwMCkpIAoKCmdncGxvdChhZ2dfdHdlZXRzLCBhZXMoeD1zY3JlZW5fbmFtZSwgeT1tZWFuX3JldHdlZXRzKSkgKyBnZW9tX2JhcihzdGF0PSJpZGVudGl0eSIpICsKICB0aGVtZShheGlzLnRleHQueD1lbGVtZW50X2JsYW5rKCksIGF4aXMudGlja3MueD1lbGVtZW50X2JsYW5rKCkpICsgCiAgZ2d0aXRsZSgiQWxtb3N0IGFsbCByZXR3ZWV0cyBhY3J1ZSB0byBhIGhhbmRmdWwgb2YgdXNlcnMiKQoKCmBgYAoKCkl0IHRoZW4sIG1heSBiZSBwb3NzaWJsZSB0byAqd2VpZ2h0KiB1c2VycyB0d2VldHMgYmFzZWQgb24gdGhlaXI6CgogIC0gQXZlcmFnZSBSZXR3ZWV0cyAKICAtIE51bWJlciBvZiBUd2VldHMKICAtIEludGVyYWN0aW9uOiBBdmVyYWdlIFJldHdlZXRzIHggTnVtYmVyIG9mIFR3ZWV0cwogIApUbyBtb3JlIGFjY3VyYWN0bHkgbW9kZWwgdGhlIHNlbnRpbWVudCBvZiB0aGUgcHVibGljIGJ5IGV4cHJlc3Npbmcgc2VudGltZW50IGFzIGEgd2VpZ2h0ZWQgZnVuY3Rpb24gb2YgaW5mbHVlbmNpYWwgcGxheWVycyBpbiB0aGUgVHdpdHRlcnNwaGVyZS4KCk90aGVyIHBvc3NpYmxlIHZhcmlhYmxlIGRpc3RpbmN0aW9uczoKCiAgLSBvd24gdHdlZXQgdnMgcmV0d2VldCBpbmZsdWVuY2UgCiAgLSByZXBsaWVzIAogIAogIAoKCiMgQ29ycHVzIEVEQQoKYGBge3J9CmxpYnJhcnkocGxvdGx5KQpsaWJyYXJ5KFJTZW50aW1lbnQpCmxpYnJhcnkoc3RyaW5ncikKbGlicmFyeShicm9vbSkKbGlicmFyeSh0aWR5cikKbGlicmFyeSh0aWR5dGV4dCkKbGlicmFyeShOTFApCgpsaWJyYXJ5KHRtKQpsaWJyYXJ5KHdvcmRjbG91ZCkKbGlicmFyeShTbm93YmFsbEMpCgojIHByb3BvcnRpb25zCmhlYWQocHJvcC50YWJsZShhZ2dfdHdlZXRzJG1lYW5fcmV0d2VldHMpLDEwKQpoZWFkKHByb3AudGFibGUoYWdnX3R3ZWV0cyRuKSwgMTApCgpsaWJyYXJ5KHRpbnl0ZXgpCgoKCgpwcmVwYXJlX2Zvcl9OTFAgPC0gZnVuY3Rpb24odGV4dF9kYXRhKSB7CiAgIlByZXBhcmUgQ29ycHVzIGZvciBOTFAiCiAgY29ycHVzIDwtIENvcnB1cyhWZWN0b3JTb3VyY2UodGV4dF9kYXRhKSkgICAgICAjIGNyZWF0ZSBjb3JwdXMKICBteUR0bSA8LSBEb2N1bWVudFRlcm1NYXRyaXgoY29ycHVzKSAgICAgICAgICAgIyBkb2MgeCB0ZXJtIG1hdHJpeAogIAogICMgcmVkdWNlIHNwYXJzaXR5CiAgc3BhcnNlID0gcmVtb3ZlU3BhcnNlVGVybXMobXlEdG0sIHNwYXJzZT0uOTkpCiAgc3BhcnNlID0gYXMuZGF0YS5mcmFtZShhcy5tYXRyaXgoc3BhcnNlKSkKICAjIGNvbG5hbWVzKHNwYXJzZSkgPSBtYWtlLm5hbWVzKGNvbG5hbWVzKHNwYXJzZSkpCiAgCiAgIyBmcmVxIG9mIHdvcmRzCiAgZnJlcXVlbmN5X29mX3dvcmRzID0gY29sU3VtcyhzcGFyc2UpCiAgZnJlcXVlbmN5X29mX3dvcmRzID0gZnJlcXVlbmN5X29mX3dvcmRzW29yZGVyKGZyZXF1ZW5jeV9vZl93b3JkcywgZGVjcmVhc2luZz1UKV0KCiAgIyBhcnJhbmdlIGZyb20gbW9zdAogIHByaW50KCJNb3N0IGZyZXF1ZW50bHkgb2NjdXJpbmcgd29yZHM6IikKICBwcmludChoZWFkKGZyZXF1ZW5jeV9vZl93b3JkcywgNykpCiAgCiAgIyBjcmVhdGUgd29yZGNsb3VkCiAgd29yZGNsb3VkKGZyZXE9YXMudmVjdG9yKGZyZXF1ZW5jeV9vZl93b3JkcyksIHdvcmRzPW5hbWVzKGZyZXF1ZW5jeV9vZl93b3JkcyksCiAgICAgICAgICBjb2xvcnM9YnJld2VyLnBhbCg5LCAiQmx1ZXMiKVs0OjldKQogIAogICMgc3RvcmUgcmVzdWx0cwogIHJlcyA9IGxpc3QoKQogIHJlcyRteUR0bSA9IG15RHRtCiAgcmVzJGZyZXF1ZW5jeV9vZl93b3JkcyA9IGZyZXF1ZW5jeV9vZl93b3JkcwogIHJlc2NvcnB1cyA9IGNvcnB1cwogIHJlcyRzcGFyc2UgPSBzcGFyc2UKICAKICByZXR1cm4ocmVzKQogIAp9CgoKcmVzID0gcHJlcGFyZV9mb3JfTkxQKGRhdGEkdGV4dCkKCgoKIyBmaW5kIGFzc29jaWF0ZWQgd29yZHM6IGdyZWF0IGZlYXR1cmUgb2Ygc2VhcmNoCnByaW50KCd3b3JkcyBhc3NvY2lhdGVkIHdpdGggImdvb2QiJykKZmluZEFzc29jcyhyZXMkbXlEdG0sIGMoJ2dvb2QnKSwgMC4xMikKICAKCgojIENsdXN0ZXIgdGhlIGRhdGEKaW5zdGFsbC5wYWNrYWdlcygnZnBjJykKbGlicmFyeShmcGMpCgojIGsgbWVhbnMgY2x1c3RlcmluZwojIGQgPSBkaXN0KHQoYXMubWF0cml4KG15RHRtKSksIG1ldGhvZD0nZXVjbGlkZWFuJykKIyBrZml0ID0ga21lYW5zKGQsIDMpCiMgc3VtbWFyeShrZml0KQojIGhlYWQoa2ZpdCkKCgoKYGBgCgoKCgoKIyBBbmFseXNpcyB1c2luZyBUaWR5IFRleHQgCgpgYGB7cn0KbGlicmFyeSh0aWR5dGV4dCkKbGlicmFyeShkcGx5cikKbGlicmFyeShzdHJpbmdyKQoKCgoKYGBgCgoKCgoKCg==</div>
 
 
 
