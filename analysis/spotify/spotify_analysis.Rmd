@@ -1,0 +1,56 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Spotify
+
+Resource:
+https://datacritics.com/2018/03/20/scrape-it-yourself-spotify-charts/
+
+```{r}
+library(rvest)
+library(tidyverse)
+library(magrittr)
+library(scales)
+library(knitr)
+library(lubridate)
+library(tibble)
+
+# SA top charts
+url <- "https://spotifycharts.com/regional/za/daily/"
+
+# time frame
+timevalues <- seq(as.Date("2008/01/01"), as.Date("2018/12/13"), by = "day")
+
+# create all 
+full_url <- paste0(url, timevalues)
+head(full_url)
+
+```
+
+
+```{r}
+SpotifyScrape <- function(x){
+ page <- x
+ rank <- page %>% read_html() %>% html_nodes('.chart-table-position') %>% html_text() %>% as.data.frame()
+ track <- page %>% read_html() %>% html_nodes('strong') %>% html_text() %>% as.data.frame()
+ artist <- page %>% read_html() %>% html_nodes('.chart-table-track span') %>% html_text() %>% as.data.frame()
+ streams <- page %>% read_html() %>% html_nodes('td.chart-table-streams') %>% html_text() %>% as.data.frame()
+ dates <- page %>% read_html() %>% html_nodes('.responsive-select~ .responsive-select+ .responsive-select .responsive-select-value') %>% html_text() %>% as.data.frame()
+
+#combine, name, and make it a tibble
+ chart <- cbind(rank, track, artist, streams, dates)
+ names(chart) <- c("Rank", "Track", "Artist", "Streams", "Date")
+ chart <- as.tibble(chart)
+ return(chart)
+}
+
+
+spotify <- map_df(final_url, SpotifyScrape)
+
+```
+
+
+
+

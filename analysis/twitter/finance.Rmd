@@ -1,18 +1,237 @@
 ---
-title: "Finance"
+title: "The Impact of Key Players in the Twittersphere on financial markets"
 output: html_notebook
 ---
 
-# Twitter Analysis 
-## Finance
+
+##### Twitter Influence Analysis
+
 
 ```{r}
-get 
+library(jsonlite)
+
+# get path to all files in folder
+file_names <- list.files(path = "../../data/twitter - finance/", pattern = "json", full.names=TRUE)
+
+
+# read in individual datasets: dynamic naming 
+# for (i in (1:length(file_names))) {
+#   assign(x=paste("twitter_",i, sep=""),
+#          value=fromJSON(file_names[i]))
+# }
+
+
+# read in  + combine data
+data = data.frame()
+for (i in file_names) {
+  data = rbind(data, fromJSON(i))
+}
+
+
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+# Clean Data
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+Process each twitter corpus with the below function.
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+library(dplyr) 
+library(SnowballC)
+library(NLP)
+library(tm)
+library(RColorBrewer)
+library(wordcloud)
+
+
+
+
+clean_twitter_data <- function(dataset) {
+    "Process each Twitter file"
+  
+    # remove redundant variables
+    dataset = select(dataset, c('is_replied','is_reply_to','likes',"parent_tweet_id", 
+                                'screen_name',"replies", "retweets","text", 'timestamp'))
+  
+    dataset[['text']] = tolower(dataset[['text']])
+    dataset[['text']] = removePunctuation(dataset[['text']])
+    dataset[['text']] = stripWhitespace(dataset[['text']])
+    dataset[['text']] = removeNumbers(dataset[['text']])
+    dataset[['text']] = removeWords(dataset[['text']], words=stopwords("en"))
+    dataset[['text']] = stemDocument(dataset[['text']])
+    
+    # remove http (url to image)
+    data$text = gsub('http\\S+\\s*',"", data$text)
+    
+    # convert to DateTime
+    dataset["timestamp"] = 
+      as.Date(dataset["timestamp"][1:nrow(dataset),1], format="%Y-%m-%d")
+    
+    return(dataset)
+}
+
+# clean 
+data = clean_twitter_data(data)
+
+
+# variables
+names(data)
+
+```
+
+
+# Distribution of Likes
+
+```{r}
+library(ggplot2)
+
+ggplot(data, aes(x=likes)) + geom_histogram(bins=100, col='blue') + 
+  ggtitle("Distribution of Likes") + lims(x=c(1,100), y=c(0,600)) 
+
+prop_likes_above <- function(data, thres) {
+  "Compute the proportion of likes above a threshold"
+  res = c()
+  
+  for (i in thres) {
+    res = c(res,mean(data>i))
+    print(paste("proportion of tweets with likes above", i, 'is', round(mean(data>i), digits=4)))
+  }
+  
+  return(data.frame(res))
+}
+
+
+proportions = prop_likes_above(data$likes, seq(100,1000,100))
+
+```
+
+
+# Understand the Data
+
+Are the number of retweets heavily skewed towards certain users?
+
+ - How many tweets do we see per user?
+ - How many average retweets do we see per user?
+ - How do these two frequencies relate?
+ 
+```{r}
+paste("Number of Unique Accounts Tweeting: ", length(unique(data$screen_name)))
+
+# mean retweets per user & tweets per account
+agg_tweets = data %>% select(screen_name, retweets) %>% 
+  group_by(screen_name) %>% summarise(mean_retweets = round(mean(retweets)),
+                                      appearances = table(screen_name),
+                                      n = n()) # same as appearences
+
+
+head(agg_tweets)
+
+
+ggplot(agg_tweets, aes(x=screen_name, y=mean_retweets)) + geom_count() + 
+  ggtitle("major retweets") +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+ggplot(agg_tweets, aes(x=mean_retweets)) + geom_histogram(bins=100, col='orange') +
+  ggtitle("Distribution of Retweets") + lims(x=c(1,50), y=c(0,300)) 
+
+
+ggplot(agg_tweets, aes(x=screen_name, y=mean_retweets)) + geom_bar(stat="identity") +
+  theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + 
+  ggtitle("Almost all retweets acrue to a handful of users")
+
+
+```
+
+
+It then, may be possible to *weight* users tweets based on their:
+
+  - Average Retweets 
+  - Number of Tweets
+  - Interaction: Average Retweets x Number of Tweets
+  
+To more accuractly model the sentiment of the public by expressing sentiment as a weighted function of influencial players in the Twittersphere.
+
+Other possible variable distinctions:
+
+  - own tweet vs retweet influence 
+  - replies 
+  
+  
+
+
+# 
+
+```{r}
+library(plotly)
+library(RSentiment)
+library(stringr)
+library(broom)
+library(tidyr)
+library(tidytext)
+library(NLP)
+library(tm)
+
+prop.table(agg_tweets$mean_retweets)
+
+prop.table(agg_tweets$n)
+
+
+
+
+
+tm_map(VectorSource(data$text), removePunctuation)
+
+tm_map(cor)
+
+
+
+
+prepare_for_NLP <- function(text_data) {
+  "Prepare Corpus for NLP"
+  corpus <- Corpus(VectorSource(tex_data))      # create corpus
+  myDtm <- TermDocumentMatrix(corpus)           # doc x term matrix
+  
+  print(paste("Most Common words: ", paste(findFreqTerms(myDtm, lowfreq=1000), collapse=", ")))
+  # removeSparseTerms(myDtm, sparse=.99)
+  
+}
+
+
+
+
+corpus <- Corpus(VectorSource(data$text))     
+myDtm <- TermDocumentMatrix(corpus)   
+
+
+
+
+?removeSparseTerms(myDtm)
+
+# reduce sparsity
+sparse = removeSparseTerms(myDtm, sparse=.995)
+sparse = as.data.frame(as.matrix(sparse))
+
+# transpose to make doc x term matrix
+sparse = t(sparse)
+dim(sparse)
+
+colnames(sparse) = make.names(colnames(sparse))
+
+
+
+wordcloud()
+colSums(sparse)
+
+DocumentTermMatrix(VectorSource(data$text)$content)
+
+```
+  
+
+
+
+
+
+
+
+
 
