@@ -1,0 +1,41 @@
+---
+title: "Twitter Influencers"
+output: html_notebook
+---
+
+
+
+# Do Certain People Yeild Supreme Influence on Twitter?
+
+```{r}
+plot(cars)
+
+library(tidytext)
+library(textdata)
+
+# set location
+setwd("~/Desktop/Quanta_CS/shiny/twitter_01")
+
+
+# download lexicon
+nrc_lexicon = get_sentiments("nrc")
+afinn_lexicon = get_sentiments("afinn")
+
+# save lexicon
+write.csv(nrc_lexicon, 'data/lexicon/nrc_lexicon.csv')
+write.csv(afinn_lexicon, 'data/lexicon/afinn_lexicon.csv')
+
+
+
+
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
