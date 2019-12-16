@@ -7,35 +7,218 @@ output: html_notebook
 
 # Do Certain People Yeild Supreme Influence on Twitter?
 
+# Score Influence
+
+Can we compute metrics to _"rank"_ the influencial power of particular members on twitter?
+
 ```{r}
-plot(cars)
 
 library(tidytext)
 library(textdata)
-
-# set location
-setwd("~/Desktop/Quanta_CS/shiny/twitter_01")
-
-
-# download lexicon
-nrc_lexicon = get_sentiments("nrc")
-afinn_lexicon = get_sentiments("afinn")
-
-# save lexicon
-write.csv(nrc_lexicon, 'data/lexicon/nrc_lexicon.csv')
-write.csv(afinn_lexicon, 'data/lexicon/afinn_lexicon.csv')
+library(rtweet)
+library(dplyr)
 
 
 
+# initial influencial users
+users <- c('WarrenIngram', 'TradersCorner', 'paul_vestact', 'SimonPB', 'Richards_Karin', 
+           'JP_Verster', 'Nerina_Visser','AdrianSaville', 'chrishartZA', 'davidshapiro61')
 
+
+
+# download their timelines
+jse_influencers <- get_timeline(users, n=2500)
+
+
+
+#  _________________________________________ INFLUENCE REPORT _________________________________________
+
+# number of tweets, no. followers, no. following (friends),
+user_summaries <- jse_influencers %>% group_by(screen_name) %>% 
+  summarise(n_tweets=n(), 
+            followers=unique(followers_count),
+            following=unique(friends_count),
+            average_retweets_per_tweet=mean(retweet_count),
+            average_likes_per_tweet=mean(favourites_count),
+            average_retweets=mean(retweet_count)
+            # dedication_of_followers_prop_likes_per_tweet=# average_likes_per_tweet/n_tweets
+            )
+
+user_summaries
 
 
 
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+# Clean Text
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+library(tidytext)
+library(ggplot2)
+  
+
+
+clean_tweets_text <- function(dataset, plot=FALSE) {
+  "Return: clean word tokens ranked by frequency of appearance"
+  
+  
+  
+  # clean & tokenize words
+  dataset <- dataset %>% unnest_tokens(word, text) %>% select(word)
+
+  # remove stop words
+  dataset <- dataset %>% anti_join(stop_words)
+
+  # count word appearences
+  dataset <- dataset %>% count(word, sort=TRUE) 
+
+  # customly remove some unwanted terms
+  dataset <- dataset[dataset$word != 'https',]
+  
+  # remove numbers
+  dataset <- dataset[is.na(as.numeric(dataset$word)),]
+
+  # order (already done?)
+  dataset <- dataset %>% mutate(word=reorder(word,n))
+
+
+  if (plot) {
+    # Most Used Words
+    dataset[1:15,] %>%
+    ggplot(aes(word,n,fill=word)) +
+    ggtitle("Most Common Words") + 
+    geom_col() +
+    xlab(NULL) + 
+    coord_flip()
+  }
+  
+  return(dataset)
+  
+}
+
+
+# convert dates
+#dataset$date = as.Date(dataset$created_at)
+  
+
+test_data <- jse_influencers %>% filter(screen_name=="Richards_Karin") 
+head(test_data)
+
+clean = clean_tweets_text(test_data, T)
+head(clean)
+
+clean[1:15,] %>%
+    ggplot(aes(word,n,fill=word)) +
+    ggtitle("Most Common Words") + 
+    geom_col() +
+    xlab(NULL) + 
+    coord_flip()
+
+
+```
+
+
+# User Sentiment Analysis
+
+### Download Sentiment Lexicon's
+```{r}
+
+# set location
+setwd("/Users/zachwolpe/Desktop/Quanta_CS/MVP/Twitter Influencers")
+
+# # download lexicon
+# nrc_lexicon = get_sentiments("nrc")
+# afinn_lexicon = get_sentiments("afinn")
+# bing_lexicon = get_sentiments("bing")
+# 
+# # save lexicon
+# write.csv(nrc_lexicon, 'data/lexicons/nrc_lexicon.csv')
+# write.csv(afinn_lexicon, 'data/lexicons/afinn_lexicon.csv')
+# write.csv(bing_lexicon, 'data/lexicons/bing_lexicon.csv')
+
+# load lexicon
+nrc_lexicon = read.csv('data/lexicons/nrc_lexicon.csv')
+afinn_lexicon = read.csv('data/lexicons/afinn_lexicon.csv')
+bing_lexicon = read.csv('data/lexicons/bing_lexicon.csv')
+
+```
+
+### Polarized Sentiment Analysis
+
+Compute the sentiment of each word in a polarized fashion (_'positive'_ or _'negative'_)
+
+```{r}
+library(dplyr)
+library(stringr)
+library(tidyr)
+
+
+test_data <- jse_influencers %>% filter(screen_name=="Richards_Karin") 
+head(test_data)
+
+# clean text
+clean = clean_tweets_text(test_data, T)
+
+# get bing sentiment
+clean <- clean %>% inner_join(bing_lexicon) %>% select(word, n, sentiment) 
+clean
+
+# compute for visualization
+clean$pole = ifelse(clean$sentiment == 'positive', 1, -1)
+clean$score = clean$pole * clean$n
+
+
+# visualize
+ggplot(clean, aes(word, score, fill=pole)) + geom_col() + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = 'none')
+
+
+print(paste("Proportion of POSITIVE sentiment words: ", mean(clean$sentiment=="positive")))
+print(paste("Proportion of NEGATIVE sentiment words: ", mean(clean$sentiment=="negative")))
+print(paste("Proportion of NEUTRAL sentiment words: ", mean(clean$sentiment=="neutral")))
+
+pie(x=c(mean(clean$sentiment=="negative"),mean(clean$sentiment=="positive")), 
+    labels=c("negative",'positive'),
+    col=c("darkblue", "lightblue"))
+
+
+
+```
+
+
+#### Citations & Resources
+
+```{r}
+# _____________________________________ Citations + Resources _____________________________________
+
+
+# ___________ rTweet ___________
+# vignette("intro", package = "rtweet")
+
+
+
+# ___________ NLP ___________
+
+# Resources: https://www.tidytextmining.com/index.html
+
+# Lixcon Citation
+# article{mohammad13,
+#     author = {Mohammad, Saif M. and Turney, Peter D.},
+#     title = {Crowdsourcing a Word-Emotion Association Lexicon},
+#     journal = {Computational Intelligence},
+#     volume = {29},
+#     number = {3},
+#     pages = {436-465},
+#     doi = {10.1111/j.1467-8640.2012.00460.x},
+#     url = {https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-8640.2012.00460.x},
+#     eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.1467-8640.2012.00460.x},
+#     year = {2013}
+# }
+```
+
+
+
 
