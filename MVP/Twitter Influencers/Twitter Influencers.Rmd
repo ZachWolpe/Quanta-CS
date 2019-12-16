@@ -297,8 +297,10 @@ diversed_sentiment
 
 
 
-# order nrc
-strsplit("anticipation negative sadness trust positive surprise joy fear disgust anger", " ")
+# order nrc by 2 criteria: circular position (CLOCK)
+data.frame(words=c('positive','joy','surprise',"sadness",'disgust','negative','anger','fear','anticipation','trust'),
+           position=c(0,1,2,3,4,5,6,7,8,9)) 
+
 
 
 
