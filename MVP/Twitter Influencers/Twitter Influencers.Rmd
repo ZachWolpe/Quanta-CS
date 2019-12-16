@@ -30,6 +30,7 @@ users <- c('WarrenIngram', 'TradersCorner', 'paul_vestact', 'SimonPB', 'Richards
 jse_influencers <- get_timeline(users, n=2500)
 
 
+names(jse_influencers)
 
 #  _________________________________________ INFLUENCE REPORT _________________________________________
 
@@ -38,7 +39,7 @@ user_summaries <- jse_influencers %>% group_by(screen_name) %>%
   summarise(n_tweets=n(), 
             followers=unique(followers_count),
             following=unique(friends_count),
-            average_retweets_per_tweet=mean(retweet_count),
+           # average_retweets_per_tweet=mean(retweet_count),
             average_likes_per_tweet=mean(favourites_count),
             average_retweets=mean(retweet_count)
             # dedication_of_followers_prop_likes_per_tweet=# average_likes_per_tweet/n_tweets
@@ -85,12 +86,13 @@ clean_tweets_text <- function(dataset, plot=FALSE) {
 
   if (plot) {
     # Most Used Words
-    dataset[1:15,] %>%
-    ggplot(aes(word,n,fill=word)) +
-    ggtitle("Most Common Words") + 
-    geom_col() +
-    xlab(NULL) + 
-    coord_flip()
+    plt <- dataset[1:15,] %>%
+      ggplot(aes(word,n,fill=word)) +
+      ggtitle("Most Common Words") + 
+      geom_col() +
+      xlab(NULL) + 
+      coord_flip()
+    print(plt)
   }
   
   return(dataset)
@@ -107,13 +109,6 @@ head(test_data)
 
 clean = clean_tweets_text(test_data, T)
 head(clean)
-
-clean[1:15,] %>%
-    ggplot(aes(word,n,fill=word)) +
-    ggtitle("Most Common Words") + 
-    geom_col() +
-    xlab(NULL) + 
-    coord_flip()
 
 
 ```
@@ -151,6 +146,7 @@ Compute the sentiment of each word in a polarized fashion (_'positive'_ or _'neg
 ```{r}
 library(dplyr)
 library(stringr)
+library(ggplot2)
 library(tidyr)
 
 
@@ -158,35 +154,105 @@ test_data <- jse_influencers %>% filter(screen_name=="Richards_Karin")
 head(test_data)
 
 # clean text
-clean = clean_tweets_text(test_data, T)
-
-# get bing sentiment
-clean <- clean %>% inner_join(bing_lexicon) %>% select(word, n, sentiment) 
-clean
-
-# compute for visualization
-clean$pole = ifelse(clean$sentiment == 'positive', 1, -1)
-clean$score = clean$pole * clean$n
+clean = clean_tweets_text(test_data, F)
 
 
-# visualize
-ggplot(clean, aes(word, score, fill=pole)) + geom_col() + 
-  theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        legend.position = 'none')
+compute_bing_sentiment <- function(word_list, lexicon) {
+  "Compute the Corpus Sentiment for a given Lexicon"
+  
+  # get bing sentiment
+  word_list <- word_list %>% inner_join(lexicon) %>% select(word, n, sentiment) 
+  
+  
+  # compute for visualization
+  word_list$pole = ifelse(word_list$sentiment == 'positive', 1, -1)
+  word_list$score = word_list$pole * word_list$n
+  
+  
+  # visualize
+  net_sent <- ggplot(word_list, aes(word, score, fill=pole)) + geom_col() + 
+      theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      legend.position = 'none')
+  print(net_sent)
+  
+  plt <- pie(x=c(mean(word_list$sentiment=="negative"),mean(word_list$sentiment=="positive")),
+             labels=c("negative",'positive'),
+             col=c("darkblue", "lightblue"))
+  print(plt)
+  
+  print(paste("Proportion of POSITIVE sentiment words: ", mean(word_list$sentiment=="positive")))
+  print(paste("Proportion of NEGATIVE sentiment words: ", mean(word_list$sentiment=="negative")))
+  print(paste("Proportion of NEUTRAL sentiment words: ", mean(word_list$sentiment=="neutral")))
+  
+  return(word_list)
+  
+  
+}
 
 
-print(paste("Proportion of POSITIVE sentiment words: ", mean(clean$sentiment=="positive")))
-print(paste("Proportion of NEGATIVE sentiment words: ", mean(clean$sentiment=="negative")))
-print(paste("Proportion of NEUTRAL sentiment words: ", mean(clean$sentiment=="neutral")))
-
-pie(x=c(mean(clean$sentiment=="negative"),mean(clean$sentiment=="positive")), 
-    labels=c("negative",'positive'),
-    col=c("darkblue", "lightblue"))
-
+compute_bing_sentiment(clean, bing_lexicon)
 
 
 ```
+
+### Weighted Sentiment Analysis
+
+Compute the sentiment of each word in a weighted fashion (_'positive'_ or _'negative'_)
+
+```{r}
+
+
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(tidyr)
+
+
+test_data <- jse_influencers %>% filter(screen_name=="Richards_Karin") 
+head(test_data)
+
+# clean text
+clean = clean_tweets_text(test_data, F)
+
+
+compute_bing_sentiment <- function(word_list, lexicon) {
+  "Compute the Corpus Sentiment for a given Lexicon"
+  
+  # get bing sentiment
+  word_list <- word_list %>% inner_join(lexicon) %>% select(word, n, sentiment) 
+  
+  
+  # compute for visualization
+  word_list$pole = ifelse(word_list$sentiment == 'positive', 1, -1)
+  word_list$score = word_list$pole * word_list$n
+  
+  
+  # visualize
+  net_sent <- ggplot(word_list, aes(word, score, fill=pole)) + geom_col() + 
+      theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      legend.position = 'none')
+  print(net_sent)
+  
+  plt <- pie(x=c(mean(word_list$sentiment=="negative"),mean(word_list$sentiment=="positive")),
+             labels=c("negative",'positive'),
+             col=c("darkblue", "lightblue"))
+  print(plt)
+  
+  print(paste("Proportion of POSITIVE sentiment words: ", mean(word_list$sentiment=="positive")))
+  print(paste("Proportion of NEGATIVE sentiment words: ", mean(word_list$sentiment=="negative")))
+  print(paste("Proportion of NEUTRAL sentiment words: ", mean(word_list$sentiment=="neutral")))
+  
+}
+
+
+compute_bing_sentiment(clean, bing_lexicon)
+
+
+```
+
+
 
 
 #### Citations & Resources
