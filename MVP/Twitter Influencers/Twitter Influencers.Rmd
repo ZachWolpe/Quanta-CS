@@ -53,6 +53,8 @@ user_summaries
 
 
 # Clean Text
+ 
+"t.co" reference to a link - which is normally an image
 
 ```{r}
 library(tidytext)
@@ -69,7 +71,7 @@ clean_tweets_text <- function(dataset, plot=FALSE) {
   dataset <- dataset %>% unnest_tokens(word, text) %>% select(word)
 
   # remove stop words
-  dataset <- dataset %>% anti_join(stop_words)
+  dataset <- dataset %>% anti_join(stop_words, by=c("word", "word"))
 
   # count word appearences
   dataset <- dataset %>% count(word, sort=TRUE) 
@@ -139,7 +141,7 @@ bing_lexicon = read.csv('data/lexicons/bing_lexicon.csv')
 
 ```
 
-### Polarized Sentiment Analysis
+### Bing: Polarized Sentiment Analysis
 
 Compute the sentiment of each word in a polarized fashion (_'positive'_ or _'negative'_)
 
@@ -148,20 +150,28 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 library(tidyr)
+library(wordcloud)
+library(reshape2)
 
+
+# ________________________________________________ Clean Data ________________________________________________
 
 test_data <- jse_influencers %>% filter(screen_name=="Richards_Karin") 
-head(test_data)
 
 # clean text
 clean = clean_tweets_text(test_data, F)
 
 
-compute_bing_sentiment <- function(word_list, lexicon) {
+
+
+
+# __________________________________________ compute_bing_sentiment __________________________________________
+
+compute_bing_sentiment <- function(word_list, lexicon, show_plots=FALSE, word_size=30) {
   "Compute the Corpus Sentiment for a given Lexicon"
   
   # get bing sentiment
-  word_list <- word_list %>% inner_join(lexicon) %>% select(word, n, sentiment) 
+  word_list <- word_list %>% inner_join(lexicon, by=c('word','word')) %>% select(word, n, sentiment) 
   
   
   # compute for visualization
@@ -170,84 +180,126 @@ compute_bing_sentiment <- function(word_list, lexicon) {
   
   
   # visualize
-  net_sent <- ggplot(word_list, aes(word, score, fill=pole)) + geom_col() + 
+  if (show_plots) {
+    net_sent <- ggplot(word_list, aes(word, score, fill=pole)) + geom_col() + 
       theme(axis.text.x = element_blank(),
       axis.ticks.x = element_blank(),
       legend.position = 'none')
-  print(net_sent)
+    print(net_sent)
+    
+    plt <- pie(x=c(mean(word_list$sentiment=="negative"),mean(word_list$sentiment=="positive")),
+               labels=c("negative",'positive'),
+               col=c("darkblue", "lightblue"))
+    print(plt)
+    
+    # Visualize Most Common Positive vs Negative Words
+    plt <- word_list %>% group_by(sentiment) %>%
+      top_n(n=10, wt=n) %>% mutate(word=reorder(word,n)) %>%
+      ggplot(aes(reorder(word,n), n, fill=sentiment)) +
+      geom_col(show.legend=FALSE) +
+      facet_wrap(~sentiment, scales="free_y") +
+      labs(y = "Contribution to Sentiment",
+           x = NULL) +
+      coord_flip()
+    print(plt)
+    
+    
+    # generate wordcloud by sentiment colours  
+    group = c(word_list$sentiment)
+    basecolours = c('darkgreen','darkred')
+    colourlist = basecolours[match(group,unique(group))]
+    
+    plt <- wordcloud(words=word_list$word, freq=word_list$n, 
+                     colors=colourlist, 
+                     ordered.colors=T,
+                     max.words=word_size)
+    print(plt)
+    
+    # Structured sentiment word cloud
+    plt <- word_list %>% acast(word ~ sentiment, value.var="n", fill=0) %>% 
+      comparison.cloud(colors=c("darkred",'darkgreen'), 
+                       max.words=word_size)
+    print(plt)
+    
+    }
   
-  plt <- pie(x=c(mean(word_list$sentiment=="negative"),mean(word_list$sentiment=="positive")),
-             labels=c("negative",'positive'),
-             col=c("darkblue", "lightblue"))
-  print(plt)
   
   print(paste("Proportion of POSITIVE sentiment words: ", mean(word_list$sentiment=="positive")))
   print(paste("Proportion of NEGATIVE sentiment words: ", mean(word_list$sentiment=="negative")))
   print(paste("Proportion of NEUTRAL sentiment words: ", mean(word_list$sentiment=="neutral")))
   
+  
   return(word_list)
-  
-  
 }
 
 
-compute_bing_sentiment(clean, bing_lexicon)
+bing_sent <- compute_bing_sentiment(clean, bing_lexicon, TRUE)
+head(bing_sent)
 
 
+        
 ```
 
-### Weighted Sentiment Analysis
 
-Compute the sentiment of each word in a weighted fashion (_'positive'_ or _'negative'_)
+### Afinn: Weighted Sentiment Analysis
+
+Compute the sentiment of each word in a weighted fashion ($\{-5,-4,..,4,5\}$)
 
 ```{r}
+NULL
+```
 
+### nrc: Diversified Sentiment Analysis
 
+Compute the sentiment of each word in a diversified fashion, sentiment words include:
+
+  - trust        
+  - fear         
+  - negative     
+  - sadness     
+  - anger        
+  - surprise     
+  - positive    
+  - disgust      
+  - joy          
+  - anticipation
+
+```{r}
 library(dplyr)
 library(stringr)
 library(ggplot2)
 library(tidyr)
+library(wordcloud)
+library(reshape2)
 
 
+# ________________________________________________________ Clean Data ________________________________________________________
 test_data <- jse_influencers %>% filter(screen_name=="Richards_Karin") 
-head(test_data)
-
-# clean text
 clean = clean_tweets_text(test_data, F)
 
 
-compute_bing_sentiment <- function(word_list, lexicon) {
-  "Compute the Corpus Sentiment for a given Lexicon"
-  
-  # get bing sentiment
-  word_list <- word_list %>% inner_join(lexicon) %>% select(word, n, sentiment) 
+# compute_bing_sentiment <- function(word_list, lexicon, show_plots=FALSE, word_size=30)
   
   
-  # compute for visualization
-  word_list$pole = ifelse(word_list$sentiment == 'positive', 1, -1)
-  word_list$score = word_list$pole * word_list$n
+# ______________________________________________________ Compute Diversified Sentiment ______________________________________________________
   
-  
-  # visualize
-  net_sent <- ggplot(word_list, aes(word, score, fill=pole)) + geom_col() + 
-      theme(axis.text.x = element_blank(),
-      axis.ticks.x = element_blank(),
-      legend.position = 'none')
-  print(net_sent)
-  
-  plt <- pie(x=c(mean(word_list$sentiment=="negative"),mean(word_list$sentiment=="positive")),
-             labels=c("negative",'positive'),
-             col=c("darkblue", "lightblue"))
-  print(plt)
-  
-  print(paste("Proportion of POSITIVE sentiment words: ", mean(word_list$sentiment=="positive")))
-  print(paste("Proportion of NEGATIVE sentiment words: ", mean(word_list$sentiment=="negative")))
-  print(paste("Proportion of NEUTRAL sentiment words: ", mean(word_list$sentiment=="neutral")))
-  
-}
+# compute diversified sentiment - compute the number of appearances of each sentiment type
+diversed_sentiment <- unique(clean %>% inner_join(nrc_lexicon) %>% 
+                               group_by(sentiment) %>% mutate(sum_n = sum(n)) %>% select(sum_n))
+# compute proportion
+diversed_sentiment$proportion = diversed_sentiment$sum_n / sum(diversed_sentiment$sum_n)
+
+# compute ratio
+diversed_sentiment$ratio = diversed_sentiment$proportion / max(diversed_sentiment$proportion)
 
 
-compute_bing_sentiment(clean, bing_lexicon)
+diversed_sentiment
+
+
+
+# order nrc
+strsplit("anticipation negative sadness trust positive surprise joy fear disgust anger", " ")
+
 
 
 ```
