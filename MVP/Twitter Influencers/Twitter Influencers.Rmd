@@ -269,6 +269,7 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 library(tidyr)
+library(tidytext)
 library(wordcloud)
 library(reshape2)
 
@@ -278,29 +279,62 @@ test_data <- jse_influencers %>% filter(screen_name=="Richards_Karin")
 clean = clean_tweets_text(test_data, F)
 
 
-# compute_bing_sentiment <- function(word_list, lexicon, show_plots=FALSE, word_size=30)
-  
+
   
 # ______________________________________________________ Compute Diversified Sentiment ______________________________________________________
+
+diversified_sentiment_analysis <- function(word_list, nrc_lexicon, show_plots=TRUE) {
+  "Compute, plot & return the diversified sentiment"
   
-# compute diversified sentiment - compute the number of appearances of each sentiment type
-diversed_sentiment <- unique(clean %>% inner_join(nrc_lexicon) %>% 
-                               group_by(sentiment) %>% mutate(sum_n = sum(n)) %>% select(sum_n))
-# compute proportion
-diversed_sentiment$proportion = diversed_sentiment$sum_n / sum(diversed_sentiment$sum_n)
+  
+  # compute diversified sentiment - compute the number of appearances of each sentiment type
+  diversed_sentiment <- unique(word_list %>% inner_join(nrc_lexicon) %>% 
+                                 group_by(sentiment) %>% mutate(sum_n = sum(n)) %>% select(sum_n))
+  # compute proportion
+  diversed_sentiment$proportion = diversed_sentiment$sum_n / sum(diversed_sentiment$sum_n)
+  
+  # compute ratio
+  diversed_sentiment$ratio = diversed_sentiment$proportion / max(diversed_sentiment$proportion)
 
-# compute ratio
-diversed_sentiment$ratio = diversed_sentiment$proportion / max(diversed_sentiment$proportion)
+  
+  
+  # order nrc by 2 criteria: circular position (CLOCK)
+  rank <- data.frame(sentiment=c('positive','joy','surprise',"sadness",'disgust','negative','anger','fear','anticipation','trust'),
+                   position=c(0,1,2,3,4,5,6,7,8,9),
+                   sent=c(1,1,0,-1,-1,-1,-1,-1,0,1)) 
+  rank <- inner_join(diversed_sentiment, rank, by="sentiment")
+
+  # order
+  rank <- rank[order(rank$position),]
+  
+  if (show_plots==T){
+      # col plot
+      plt <- ggplot(rank, aes(x=reorder(sentiment, position), y=proportion, fill=sent)) + geom_col() + ggtitle("Diversified Sentiment")
+      print(plt)
+    
+      # coordinate plot
+      plt <- ggplot(rank, aes(x=reorder(sentiment, position), y=ratio, fill=(sent))) + 
+        geom_bar(stat='identity', show.legend=F) +
+        coord_polar() + 
+        ggtitle("Sentiment of Tweets")+ 
+        xlab("") + ylab("") + 
+        theme(legend.position = "None",
+              axis.ticks.y = element_blank(),
+              axis.line.y = element_blank(),
+              axis.text.y = element_blank(),
+              plot.title = element_text(hjust = 0.5),
+              panel.background = element_rect(fill = "white"),
+             panel.grid.major = element_line(colour='#DCDCDC'),
+             panel.grid.minor  = element_line(colour='#DCDCDC'))  
+      print(plt) 
+  }
+  return(rank)
+}
 
 
-diversed_sentiment
 
-
-
-# order nrc by 2 criteria: circular position (CLOCK)
-data.frame(words=c('positive','joy','surprise',"sadness",'disgust','negative','anger','fear','anticipation','trust'),
-           position=c(0,1,2,3,4,5,6,7,8,9)) 
-
+# ______________________________________________________ Call Function ______________________________________________________
+diversified_sentiment_analysis(clean, nrc_lexicon)
 
 
 

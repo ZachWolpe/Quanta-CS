@@ -18,7 +18,9 @@ shinyServer(function(input, output) {
     
     users <- reactive({
         ##users <- strsplit(input$users, " ")
-        input$users
+        users <- input$users
+        
+        
         })
     
     output$username <- renderText({
