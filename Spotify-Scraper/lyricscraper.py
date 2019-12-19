@@ -134,3 +134,89 @@ for index, row in billboard.iterrows():
             print('error')
 lyrics_list.append(lyrics)
 #source_list.append(source)
+
+def clean_lyrics(lyrics):
+    if lyrics is None:
+        return lyrics
+
+    # combine lists of tokens into single string
+    lyrics = ' '.join(lyrics)
+
+    # remove apostrophes
+    lyrics = lyrics.replace('\'', '')
+
+    # remove song structure tags or instructions in brackets
+    lyrics = re.sub(r'[\*\[|\(|\{].*\n*.*[\]\)\}\*]' , ' ', lyrics)
+
+    # remove variations of Verse 1, VERSE 2, etc...
+    for verse in ['verse', 'VERSE', 'Verse']:
+        lyrics = re.sub(verse+' \d*', '', lyrics)
+
+    # some structure markers formatted as allcaps without brackets
+    for word in ['OUTRO', 'INSTRUMENTAL', 'PRE', 'HOOK',
+                 'PRODUCED', 'REFRAIN', 'POST', 'REPEAT', '2x', '3x', '4x',
+                 'CHORUS', 'INTRO', 'INTERLUDE']:
+        lyrics = lyrics.replace(word, '')
+
+    # remove varations of Chorus
+    lyrics = re.sub(r'\n*Chorus:*.*' , ' ', lyrics)
+    lyrics = re.sub(r'^Chorus:*.*' , ' ', lyrics)
+    lyrics = re.sub(r'\nRepeat [C|c]horus:*.*' , ' ', lyrics)
+
+    # remove variations of Intro
+    lyrics = re.sub(r'Intro[\s|\n|:].*', ' ', lyrics)
+
+    # remove variations of Instrumental
+    lyrics = re.sub(r'-+.*[i|I]nstrumental.*-+', ' ', lyrics)
+    lyrics = re.sub(r'\nBrief instrumental.*\n', ' ', lyrics)
+    lyrics = re.sub(r'\nInstrumental', ' ', lyrics)
+    lyrics = re.sub(r'\nInstrumental break', ' ', lyrics)
+    lyrics = re.sub(r'\nInstrumental--', ' ', lyrics)
+    lyrics = re.sub(r'\n~Instrumental~', ' ', lyrics)
+
+    # remove variations of Bridge
+    lyrics = re.sub(r'\n\[*Bridge:\[*', ' ', lyrics)
+
+    # remove variations of Hook
+    lyrics = re.sub(r'Hook:.*', ' ', lyrics)
+
+    # remove varations of Repeat
+    lyrics = re.sub(r'Repeat\s.*', ' ', lyrics)
+    lyrics = re.sub(r'\nRepeat$', ' ', lyrics)
+
+    # remove credits
+    lyrics = re.sub(r'.*[P|p]roduced [B|b]y.*', ' ', lyrics)
+    lyrics = re.sub(r'.*[W|w]ritten [B|b]y.*', ' ', lyrics)
+
+    # remove strays and typos
+    lyrics = re.sub(r'\[Outro\[', ' ', lyrics)
+    lyrics = re.sub(r'Sax & background & instrumental\)', ' ', lyrics)
+    lyrics = re.sub(r'\nSource: ', ' ', lyrics)
+    #lyrics = re.sub(r'Shotgun 2: 58 Trk 1 \n  \nJr. Walker & The All Stars '\
+                #    +'\nAnd/or The Funk Brothers - instrumental \nPop Chart '\
+                #    +'#4 Feb 13, 1965 \nSoul Label - 35008   \n ', ' ', lyrics)
+    lyrics = re.sub(r'- musical interlude -', ' ', lyrics)
+    lyrics = re.sub(r'\nRefrain:', ' ', lyrics)
+
+    # replace all punctuations with spaces
+    lyrics = re.sub(r'[^\w\s]', ' ', lyrics)
+
+    # replace consecutive whitespaces with single space
+    lyrics = re.sub(r'\s+', ' ', lyrics)
+
+    # convert all tokens to lowercase
+    lyrics = lyrics.lower()
+
+    if lyrics[:29] == 'we do not have the lyrics for' or lyrics == 'instrumental':
+        lyrics = np.nan
+    return lyrics
+
+    lyrics_list_clean = list(map(clean_lyrics, lyrics_list))
+billboard['lyrics'] = lyrics_list_clean
+#billboard['source'] = source_list
+
+lyrics = billboard['lyrics'].dropna()
+for each in lyrics[lyrics.str.contains('chorus')]:
+    print([each])
+
+billboard.to_csv('../data/spotify-lyrics.csv', index=False)
