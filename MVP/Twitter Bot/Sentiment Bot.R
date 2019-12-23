@@ -10,21 +10,38 @@ library(randomcoloR)
 library(stringr)
 
 
+# ________________________ ______________________________ Access Tokens & Keys ______________________________________________________
+create_my_token <- function() {
+  appname <- "QuantaLabsSentiment"                                         ## name assigned to created app
+  key <- "szmabseQ9HceMuv0xFQjveaRq"                                       ## api key 
+  secret <- "6gKES04Mrx3nhNdSbmPTtwkRW20yLmmyl1fgfpzFHeWW8pfZ5t"           ## api secret 
+  token <- "1208662769438003201-C5Od4DcVEKC3YKH8x4Tm398yaqpZFi"            ## api access token
+  token_secret <- "mj81VVg04Tem352M2KzTybXGV3FQRRVGYTsy95rA39geR"          ## api access token secret
+  
+  twitter_token <- create_token(
+    app=appname,
+    consumer_key=key,
+    consumer_secret=secret,
+    access_token=token,
+    access_secret=token_secret)
+  
+  return(twitter_token)
+}
 # ______________________________________________________ Access Tokens & Keys ______________________________________________________
-appname <- "QuantaLabsSentiment"                                         ## name assigned to created app
-key <- "szmabseQ9HceMuv0xFQjveaRq"                                       ## api key 
-secret <- "6gKES04Mrx3nhNdSbmPTtwkRW20yLmmyl1fgfpzFHeWW8pfZ5t"           ## api secret 
-token <- "1208662769438003201-C5Od4DcVEKC3YKH8x4Tm398yaqpZFi"            ## api access token
-token_secret <- "mj81VVg04Tem352M2KzTybXGV3FQRRVGYTsy95rA39geR"          ## api access token secret
 
-twitter_token <- create_token(
-  app=appname,
-  consumer_key=key,
-  consumer_secret=secret,
-  access_token=token,
-  access_secret=token_secret)
-# ______________________________________________________ Access Tokens & Keys ______________________________________________________
 
+
+
+# ______________________________________________________ Configure Workspace ______________________________________________________
+configure_workspace <- function() {
+  setwd("~/Desktop/Quanta AI/Quanta_CS/MVP/Twitter Bot")
+  
+  # load lexicon
+  nrc_lexicon <<- read.csv('./data/lexicon/nrc_lexicon.csv')
+  afinn_lexicon <<- read.csv('./data/lexicon/afinn_lexicon.csv')
+  bing_lexicon <<- read.csv('./data/lexicon/bing_lexicon.csv')
+}
+# ______________________________________________________ Configure Workspace ______________________________________________________
 
 
 
@@ -32,13 +49,6 @@ twitter_token <- create_token(
 # ______________________________________________________ Compute Analysis ______________________________________________________
 compute_analysis <- function(user_id) {
   "Return a users Sentiment Analysis Plot"
-  
-  setwd("~/Desktop/Quanta AI/Quanta_CS/MVP/Twitter Bot")
-  
-  # load lexicon
-  nrc_lexicon = read.csv('./data/lexicon/nrc_lexicon.csv')
-  afinn_lexicon = read.csv('./data/lexicon/afinn_lexicon.csv')
-  bing_lexicon = read.csv('./data/lexicon/bing_lexicon.csv')
   
   clean_tweets_text <- function(dataset) {
     "Return: clean word tokens ranked by frequency of appearance"
@@ -88,7 +98,7 @@ compute_analysis <- function(user_id) {
   # ________ ________ Sentiment Rose Graph ________ ________
   plt <- ggplot(rank, aes(x=reorder(sentiment, position), y=proportion, fill=factor(sent))) + 
     geom_bar(stat='identity', show.legend=F) +
-    coord_polar() + ggtitle(sprintf("Sentiment of %s's Tweets!", screen_name)) +
+    coord_polar() + ggtitle(sprintf("Sentiment of %s's Tweets!", tweets$screen_name[1])) +
     xlab("") + ylab("") + 
     theme(legend.position = "None",
           axis.ticks.y = element_blank(),
@@ -103,9 +113,17 @@ compute_analysis <- function(user_id) {
   
   # Store Results --?
   
-  return(plt)
+  
+  # return plot 
+  results <- list()
+  results[['username']] = tweets$screen_name[1]
+  results[['plot']] = plt
+
+  return(results)
 }
 # ______________________________________________________ Compute Analysis ______________________________________________________
+
+
 
 
 
@@ -129,7 +147,9 @@ post_user_sentiment <- function(twitter_token, screen_name, plt) {
   # ___ ___ ___ to make it run ___ ___ ___ 
   
   # post tweet
-  post_tweet(status='my first AI tweet #RebelBot', token=twitter_token)
+  post_tweet(status=paste('Hey @', screen_name, "! Here's your sentiment", sep=""), 
+             media=plt, 
+             token=twitter_token)
 }
 # _________________________________________________________ Post Tweet _________________________________________________________
 
@@ -148,43 +168,80 @@ post_user_sentiment <- function(twitter_token, screen_name, plt) {
 
 
 
-
-
-
-
 # ___________________________________________________ Communicate with User: DM ___________________________________________________
-# Get DM's
-dm <- direct_messages(token=twitter_token)
-
-# for each row (message)
-for (i in (1:dim(dm$events)[1])) {
+compute_on_DMs <- function(twitter_token, compute_analysis) {
   
-  # check if message contains string
-  if (str_detect(dm$events$message_create[i,]$message_data$text, 
-                 regex("please compute my sentiment", ignore_case=TRUE))) {
+  # Get DM's
+  dm <- direct_messages(token=twitter_token)
+  
+  # for each row (message)
+  for (i in (1:dim(dm$events)[1])) {
     
-    # set user ID
-    user_id <- dm$events$message_create[i,]$sender_id
-    print(dm$events$message_create[i,]$sender_id)
-    
-    # check if user has NOT already been accounted for (send reply after posted users)
-    if (!str_detect(dm$events$message_create$message_data$text[dm$events$message_create$target$recipient_id == user_id],
-                   regex("Done! Check my Feed!", ignore_case=TRUE))) {
+    # check if message contains string
+    if (str_detect(dm$events$message_create[i,]$message_data$text, 
+                   regex("please compute my sentiment", ignore_case=TRUE))) {
       
+      # set user ID
+      user_id <- dm$events$message_create[i,]$sender_id
       
-      # ____ compute sentiment graph ____
-      plt <- compute_analysis(user_id)
-    
+      # check if user has NOT already been accounted for (send reply after posted users)
+      if  (any(!str_detect(dm$events$message_create$message_data$text[dm$events$message_create$target$recipient_id == user_id],
+                           regex("Done! Check my Feed!", ignore_case=TRUE)))
+      ) {
+        
+        # ____ compute sentiment graph ____
+        res <- compute_analysis(user_id)
+        
+        # save plot
+        sentiment_image_path <- ggsave(filename="temp_sentiment_path.png", plot=res[['plot']])
+        
+        # ____ create post ____
+        post_user_sentiment(twitter_token=twitter_token,
+                            screen_name=res$username, 
+                            plt='temp_sentiment_path.png')
+      }
     }
   }
+  return(res)
 }
 # ___________________________________________________ Communicate with User: DM ___________________________________________________
 
 
+# 
+# data("midwest", package = "ggplot2") 
+# 
+# # Init Ggplot
+# plt <- ggplot(midwest, aes(x=area, y=poptotal)) 
+# 
+# 
+# x = seq(1:100)
+# y = runif(100, min=-3, max=3)*x
+# data = data.frame(x=x, y=y)
+# 
+# plt <- ggplot(data, aes(x=x, y=y)) + geom_point()
+#   
+# 
+# ggsave(filename="temp_sentiment_path.png", plot=plt)
 
 
 
+# _____________________________________________________                        _____________________________________________________
+# _____________________________________________________ Call Full Computation  _____________________________________________________
+# _____________________________________________________                        _____________________________________________________
 
+# create token
+twitter_token <- create_my_token()
+
+# configure workspace
+configure_workspace()
+
+# compute results 
+res <- compute_on_DMs(twitter_token, compute_analysis)
+
+# _____________________________________________________                        _____________________________________________________
+# _____________________________________________________ Call Full Computation  _____________________________________________________
+# _____________________________________________________                        _____________________________________________________
+ 
 
 
 
