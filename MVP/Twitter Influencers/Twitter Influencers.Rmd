@@ -122,7 +122,8 @@ head(clean)
 ```{r}
 
 # set location
-setwd("/Users/zachwolpe/Desktop/Quanta_CS/MVP/Twitter Influencers")
+getwd()
+setwd("/Users/zachwolpe/Desktop/Quanta AI/Quanta_CS/MVP/Twitter Influencers")
 
 # # download lexicon
 # nrc_lexicon = get_sentiments("nrc")
@@ -167,7 +168,7 @@ clean = clean_tweets_text(test_data, F)
 
 # __________________________________________ compute_bing_sentiment __________________________________________
 
-compute_bing_sentiment <- function(word_list, lexicon, show_plots=FALSE, word_size=30) {
+compute_bing_sentiment <- function(word_list, lexicon=bing_lexicon, show_plots=FALSE, word_size=30, printt=F) {
   "Compute the Corpus Sentiment for a given Lexicon"
   
   # get bing sentiment
@@ -223,11 +224,11 @@ compute_bing_sentiment <- function(word_list, lexicon, show_plots=FALSE, word_si
     
     }
   
-  
+  if (printt) {
   print(paste("Proportion of POSITIVE sentiment words: ", mean(word_list$sentiment=="positive")))
   print(paste("Proportion of NEGATIVE sentiment words: ", mean(word_list$sentiment=="negative")))
   print(paste("Proportion of NEUTRAL sentiment words: ", mean(word_list$sentiment=="neutral")))
-  
+  }
   
   return(word_list)
 }
@@ -341,7 +342,176 @@ diversified_sentiment_analysis(clean, nrc_lexicon)
 ```
 
 
+# Contrast with Markets
 
+```{r}
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+jse_top40 <- read.csv("../../data/jse/JSE_top40.csv")
+
+
+jse_top40$Date <- as.Date(jse_top40$Date, "%b %d, %Y")                          # clean Dates
+jse_top40$Vol.[grepl("-", jse_top40$Vol.)] = NaN                                # clean Vol. 
+jse_top40$Vol. <- as.numeric(sub("K", "e3", jse_top40$Vol., fixed=TRUE))
+jse_top40$Price <- as.numeric(sub(",", "", jse_top40$Price))                    # clean Price
+jse_top40$Change.. <- as.numeric(sub("%", "", jse_top40$Change..))              # clean Change..       
+jse_top40 <- select(jse_top40, Date, Price, Vol., Change..)                     # select variables
+
+
+ggplot(jse_top40, aes(x=Date, y=Price)) + geom_line(col="darkblue") + ggtitle("JSE Top 40: Value")
+
+ggplot(jse_top40, aes(x=Date, y=Change..)) + geom_line(col="lightblue") + ggtitle("JSE Top 40: Change")
+
+```
+
+
+# Get Tweets by Date
+## Contrast Sentiment over 1 Year
+
+Compute Net Sentiment for Each Week
+
+RETURN TO THIS
+
+
+```{r}
+library(lubridate)
+library(rtweet)
+
+library(twitteR)
+
+
+rt <- c()
+since <- as.Date("2019-01-01")
+
+search_tweets('WarrenIngram', n=10, since="2018-01-01", until="2019-01-10")
+
+get_timeline('WarrenIngram',n=10,
+             since="2018-01-01", until="2018-01-10")
+
+for (i in (1:5)) {
+  
+  until <- since
+  week(until) <- week(since) + 1
+  
+  
+  # compute 
+  tweet <- search_tweets('richards_karin', since=since, until=until)
+  print(tweet)
+ #  score <- sum(compute_bing_sentiment(clean_tweets_text(richards_karin), bing_lexicon) %>% select(score))
+  
+  rt <- c(rt, score)
+  
+  # update dates
+  since <- until
+  
+
+}
+
+```
+
+
+# Markets vs Sentiment
+
+```{r}
+# Filter for 2019
+library(dplyr)
+library(tidytext)
+library(lubridate)
+library(rtweet)
+library(ggplot2)
+
+
+# initial influencial users
+users <- c('WarrenIngram', 'TradersCorner', 'paul_vestact', 'SimonPB', 'Richards_Karin', 
+           'JP_Verster', 'Nerina_Visser','AdrianSaville', 'chrishartZA', 'davidshapiro61')
+
+# download their timelines
+jse_tweets_BIG <- get_timeline(users, n=5000)
+
+
+
+
+# ____________________________ COMPUTE SENTIMENT PER WEEK (for 1 year) ____________________________
+
+# create weekly grouping 
+weekly <- jse_tweets_BIG %>% filter(created_at>="2019-01-01") %>% group_by(screen_name, week=week(created_at)) %>% 
+  select(text, week, created_at, screen_name)
+
+
+# __________________________________ Not Efficient but Words __________________________________
+
+dates <- seq(from=as.Date("2019-01-01"), to=as.Date("2019-12-31"), by='week')
+
+
+sent <- c()
+
+for (w in (1:(length(dates)-2))) {
+  rt <- jse_tweets_BIG %>% filter(created_at>=dates[w], created_at<dates[w+1])
+  
+  clean <- clean_tweets_text(rt)
+  net_sentment <- mean(compute_bing_sentiment(clean, bing_lexicon)[['score']])
+  
+  # store results
+  sent <- rbind(
+    sent,
+    data.frame(net_sentiment=net_sentment, since=dates[w], until=dates[w+1])
+  )
+}
+
+sent <- data.frame(sent)
+
+# __________________________________ Compute 1, standardized dataset __________________________________
+
+
+
+# ______________ Inner Join ______________
+
+# Remove NaN values
+sent[is.na(sent)] <- 0
+
+
+# Create 1 Dataset
+rt <- inner_join(
+  jse_top40 %>% filter(Date >= dates[1]) %>% mutate(stand_price=(Price-mean(Price))/sd(Price)),
+  sent %>% mutate(stand_net_sentiment = (net_sentiment-mean(net_sentiment))/sd(net_sentiment)),
+  by=c('Date' = "until"))
+
+
+ggplot(rt[rt$Date>"2015-01-01",], aes(x=Date, y=stand_price)) + geom_line(col='darkblue') + 
+  geom_line(aes(x=Date, y=stand_net_sentiment), col='orange')
+
+
+from <- "2018-01-01"
+ggplot(rt[rt$Date>from,], aes(x=Date, y=stand_price)) + geom_line(col='darkblue') + 
+  geom_line(aes(x=Date, y=stand_net_sentiment), col='orange')
+
+cor(rt$net_sentiment, rt$Price)
+
+
+
+```
+
+
+# A person's biggest Inlfluences
+
+ - Who influence as particular person the most? & how much net influence do they have?
+ - Get the sentiment of their most influencial accounts (Computational Limits)
+ - Score the sentiment of the accounts the user "agrees" with (likes tweets)
+
+Functions:
+ 
+ - get_friends
+ - get_favourites
+
+
+```{R}
+
+# ____________________________________ Compute the Net Influence of ____________________________________
+
+```
 
 #### Citations & Resources
 
