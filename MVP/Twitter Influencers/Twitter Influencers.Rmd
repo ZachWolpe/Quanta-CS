@@ -11,6 +11,23 @@ output: html_notebook
 
 Can we compute metrics to _"rank"_ the influencial power of particular members on twitter?
 
+packages
+```{r}
+
+library(tidytext)
+library(textdata)
+library(rtweet)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+library(wordcloud)
+library(reshape2)
+
+```
+
+
 ```{r}
 
 library(tidytext)
@@ -124,6 +141,7 @@ head(clean)
 # set location
 getwd()
 setwd("/Users/zachwolpe/Desktop/Quanta AI/Quanta_CS/MVP/Twitter Influencers")
+setwd("~/Desktop/Quanta AI/Quanta_CS/MVP/Twitter Influencers")
 
 # # download lexicon
 # nrc_lexicon = get_sentiments("nrc")
@@ -350,7 +368,8 @@ library(readr)
 library(dplyr)
 library(ggplot2)
 
-jse_top40 <- read.csv("../../data/jse/JSE_top40.csv")
+
+jse_top40 <- read.csv("../../data/jse/jalsh.csv")
 
 
 jse_top40$Date <- as.Date(jse_top40$Date, "%b %d, %Y")                          # clean Dates
@@ -423,7 +442,6 @@ library(lubridate)
 library(rtweet)
 library(ggplot2)
 
-
 # initial influencial users
 users <- c('WarrenIngram', 'TradersCorner', 'paul_vestact', 'SimonPB', 'Richards_Karin', 
            'JP_Verster', 'Nerina_Visser','AdrianSaville', 'chrishartZA', 'davidshapiro61')
@@ -485,8 +503,9 @@ ggplot(rt[rt$Date>"2015-01-01",], aes(x=Date, y=stand_price)) + geom_line(col='d
 
 
 from <- "2018-01-01"
-ggplot(rt[rt$Date>from,], aes(x=Date, y=stand_price)) + geom_line(col='darkblue') + 
-  geom_line(aes(x=Date, y=stand_net_sentiment), col='orange')
+ggplot(rt[rt$Date>from,], aes(x=Date, y=stand_price)) + geom_line(col='darkblue', linetype='dashed') + geom_point() + 
+  geom_line(aes(x=Date, y=stand_net_sentiment), col='orange', linetype='dashed') + 
+  geom_point(aes(x=Date, y=stand_net_sentiment), col='orange') 
 
 cor(rt$net_sentiment, rt$Price)
 
@@ -511,6 +530,16 @@ Functions:
 
 # ____________________________________ Compute the Net Influence of ____________________________________
 
+# nate_silver <- get_timeline('NateSilver538', 10000)
+realDonaldTrump <- get_timeline('realDonaldTrump', 10000)
+
+
+TrumpFriends <- get_friends(users='realDonaldTrump', n=5000)
+
+# Friends Tweets 
+FriendsTweets <- get_timeline(TrumpFriends$user_id, n=500)
+
+# compute sentiment 
 ```
 
 #### Citations & Resources
