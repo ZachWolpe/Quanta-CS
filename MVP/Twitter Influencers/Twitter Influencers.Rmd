@@ -14,17 +14,20 @@ Can we compute metrics to _"rank"_ the influencial power of particular members o
 packages
 ```{r}
 
-library(tidytext)
-library(textdata)
-library(rtweet)
-library(dplyr)
-library(lubridate)
-library(ggplot2)
-library(stringr)
-library(tidyr)
-library(wordcloud)
-library(reshape2)
+load_packages <- function() {
+  library(tidytext)
+  library(textdata)
+  library(rtweet)
+  library(dplyr)
+  library(lubridate)
+  library(ggplot2)
+  library(stringr)
+  library(tidyr)
+  library(wordcloud)
+  library(reshape2)
+}
 
+load_packages()
 ```
 
 
@@ -429,6 +432,7 @@ for (i in (1:5)) {
 
 }
 
+
 ```
 
 
@@ -511,6 +515,13 @@ cor(rt$net_sentiment, rt$Price)
 
 
 
+# _______________________________________________________ Sentiment over Time _______________________________________________________
+
+
+
+
+
+
 ```
 
 
@@ -534,12 +545,31 @@ Functions:
 realDonaldTrump <- get_timeline('realDonaldTrump', 10000)
 
 
-TrumpFriends <- get_friends(users='realDonaldTrump', n=5000)
+TrumpFriends <- get_friends(users='realDonaldTrump')
 
 # Friends Tweets 
 FriendsTweets <- get_timeline(TrumpFriends$user_id, n=500)
 
-# compute sentiment 
+
+# _______ _______ _______ _______ compute sentiment _______ _______ _______ _______
+# How do Trumps influences predict his sentiment?
+
+
+library(parallel)
+
+
+
+TrumpsFriendsSentiment <- FriendsTweets %>% group_by(screen_name) %>% select(text) %>%
+  clean_tweets_text() %>% compute_bing_sentiment() %>%
+  summarise(sum_scores = sum(score))
+
+wordcloud(words=TrumpsFriendsSentiment$screen_name, 
+          freq=TrumpsFriendsSentiment$sum_scores,
+          max.words=30) 
+
+
+
+
 ```
 
 #### Citations & Resources

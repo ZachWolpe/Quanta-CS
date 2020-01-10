@@ -147,7 +147,7 @@ post_user_sentiment <- function(twitter_token, screen_name, plt) {
   # ___ ___ ___ to make it run ___ ___ ___ 
   
   # post tweet
-  post_tweet(status=paste('Hey @', screen_name, "! Here's your sentiment", sep=""), 
+  post_tweet(status=paste('Hey @', screen_name, "! Here's your sentiment:", sep=""), 
              media=plt, 
              token=twitter_token)
 }
